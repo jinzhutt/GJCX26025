@@ -1,0 +1,137 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
+        xmlns:local="clr-namespace:PressureTestApp.UI.Views"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="PressureTestApp.UI.Views.TH2883Window"
+        x:DataType="local:TH2883Window"
+        Title="TH2883Window"
+        Width="1280" Height="800"
+        WindowStartupLocation="CenterScreen"
+        Background="#2B303A">
+<Grid Margin="15" ColumnDefinitions="*,360">
+
+   
+      <!-- 左侧波形图表 -->
+      <Border Grid.Column="0" Margin="10"
+                Background="#383E49"
+                Padding="15">
+            <lvc:CartesianChart
+                Series="{Binding Series}"
+                XAxes="{Binding XAxes}"
+                YAxes="{Binding YAxes}"
+                Background="#383E49"/>
+        </Border>
+
+        <!-- 右侧控制面板 -->
+        <Border Grid.Column="1" Margin="10" Background="#383E49" Padding="20">
+            
+
+            <StackPanel Spacing="12">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <TextBlock Text="串口号:" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="cmbComPort" Width="180" VerticalAlignment="Center" BorderBrush="Gray"    BorderThickness="1">
+                    <ComboBox.Styles>
+                            <!-- 1. 下拉框主体的样式（解决选中显示区白底白字） -->
+                            <Style Selector="ComboBox TextBox">
+                                <Setter Property="Foreground" Value="Black"/>       <!-- 文字黑色 -->
+                                <Setter Property="Background" Value="Gray"/>       <!-- 背景白色 -->
+                                <Setter Property="BorderThickness" Value="0"/>      <!-- 去掉内部边框 -->
+                            </Style>
+
+                           <!-- 2. 下拉选项正常状态 -->
+                            <Style Selector="ComboBoxItem">
+                                <Setter Property="Foreground" Value="Black"/>
+                                <Setter Property="Background" Value="Gray"/>
+                                <Setter Property="Padding" Value="5,2"/>            <!-- 增加内边距，文字不挤 -->
+                            </Style>
+
+                            <!-- 3. 下拉选项鼠标悬浮 -->
+                            <Style Selector="ComboBoxItem:pointerover">
+                                <Setter Property="Foreground" Value="Black"/>
+                                <Setter Property="Background" Value="Gray"/>
+                            </Style>
+
+                            <!-- 4. 下拉选项选中 -->
+                            <Style Selector="ComboBoxItem:selected">
+                                <Setter Property="Foreground" Value="Black"/>
+                                <Setter Property="Background" Value="#0078D7"/>
+                            </Style>
+                        </ComboBox.Styles>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Button x:Name="btnConnect" Content="连接" Click="BtnConnect_Click" Width="120" Height="40" Background="#444955" Foreground="White"/>
+                    <Button x:Name="btnDisconnect" Content="断开" Click="BtnDisconnect_Click" Width="120" Height="40" Background="#444955" Foreground="White"/>
+                    <TextBlock x:Name="tbConnState" Text="未连接" Foreground="Red" FontSize="16" VerticalAlignment="Center"/>
+                </StackPanel>
+                  <!-- 分隔线 -->
+                <Border Height="2" Background="#555A64"/>
+                <!-- 试验参数 -->
+                <StackPanel Spacing="12">
+                    <TextBlock Text="试验参数" Foreground="#FFFFFF" FontSize="16" FontWeight="Bold"/>
+                    <DockPanel>
+                        <TextBlock  Text="输出电压" Width="80" VerticalAlignment="Center" Foreground="#EEEEEE"/>
+                        <TextBox x:Name="txtSet4" Width="200" Background="#ECECEC" Foreground="#000000" Padding="6,4"/>
+                    </DockPanel>
+                    <Button Content="设置标准波形"
+                            Width="120"
+                            HorizontalAlignment="Right"
+                            Background="#444955"
+                            Foreground="White"
+                            Padding="6,8"/>
+                </StackPanel>
+                 <!-- 分隔线 -->
+                <Border Height="2" Background="#555A64"/>
+
+                <!-- 试验结果 -->
+                <StackPanel Spacing="12">
+                    <TextBlock Text="试验结果" Foreground="#FFFFFF" FontSize="16" FontWeight="Bold"/>
+                    <DockPanel>
+                        <TextBlock Text="U‑V" Width="60" VerticalAlignment="Center" Foreground="#EEEEEE" TextAlignment="Right"/>
+                        <TextBox x:Name="lblUV" Width="200" Background="#ECECEC" Foreground="#000000" Padding="6,4"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="V‑W" Width="60" VerticalAlignment="Center" Foreground="#EEEEEE" TextAlignment="Right"/>
+                        <TextBox x:Name="lblVW" Width="200" Background="#ECECEC" Foreground="#000000" Padding="6,4"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="U‑W" Width="60" VerticalAlignment="Center" Foreground="#EEEEEE" TextAlignment="Right"/>
+                        <TextBox x:Name="lblUW" Width="200" Background="#ECECEC" Foreground="#000000" Padding="6,4"/>
+                    </DockPanel>
+                </StackPanel>
+
+                <!-- 分隔线 -->
+                <Border Height="2" Background="#555A64"/>
+
+                <!-- 标准波形选择 -->
+                <StackPanel Spacing="10">
+                    <TextBlock Text="标准波形选择" Foreground="#FFFFFF" FontSize="16" FontWeight="Bold"/>
+                    <RadioButton x:Name="radBeiCe" Content="被测件比较" IsChecked="True" Foreground="#EEEEEE"/>
+                    <RadioButton x:Name="radBiaoZhun" Content="标准件比较" Foreground="#EEEEEE"/>
+                </StackPanel>
+
+                <!-- 曲线显示选择 -->
+                <StackPanel Spacing="10">
+                    <TextBlock Text="曲线显示选择" Foreground="#FFFFFF" FontSize="16" FontWeight="Bold"/>
+                    <StackPanel Orientation="Horizontal" Spacing="15">
+                        <CheckBox Content="U‑V" IsChecked="True" Foreground="#EEEEEE"/>
+                        <CheckBox Content="V‑W" IsChecked="True" Foreground="#EEEEEE"/>
+                        <CheckBox Content="U‑W" IsChecked="True" Foreground="#EEEEEE"/>
+                    </StackPanel>
+                </StackPanel>
+                <!-- 分隔线 -->
+                <Border Height="2" Background="#555A64"/>
+
+                <!-- 底部按钮，完全和第一张按钮样式一致 -->
+                <StackPanel Orientation="Horizontal" Spacing="15" HorizontalAlignment="Right" Margin="0,10,0,0">
+                    <Button x:Name="btnStart" Content="开始" Click="BtnStart_Click" Width="120" Height="40" Background="#444955" Foreground="White"/>
+                    <Button x:Name="btnStop" Content="结束" Click="BtnStop_Click"  Width="120" Height="40" Background="#444955" Foreground="White"/>
+                </StackPanel>
+
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

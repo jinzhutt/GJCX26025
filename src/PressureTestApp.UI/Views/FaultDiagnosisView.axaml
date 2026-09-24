@@ -1,0 +1,139 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:PressureTestApp.UI.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1600" d:DesignHeight="900"
+             x:Class="PressureTestApp.UI.Views.FaultDiagnosisView"
+             x:DataType="vm:FaultDiagnosisViewModel">
+
+  <Grid RowDefinitions="Auto,Auto,*,Auto">
+    <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,16">
+      <StackPanel VerticalAlignment="Center" Spacing="4">
+        <TextBlock Text="故障诊断" FontSize="{StaticResource FsH1}"
+                   FontWeight="SemiBold" Foreground="{StaticResource BrushPrimary}"/>
+        <TextBlock Text="设备出问题时快速定位故障原因与处理建议" FontSize="12"
+                   Foreground="{StaticResource BrushTextTertiary}"/>
+      </StackPanel>
+      <Button Grid.Column="1" Content="刷新" MinWidth="88" MinHeight="36" Margin="0,0,8,0"
+              Command="{Binding RefreshFromMainCommand}" VerticalAlignment="Center"/>
+      <Button Grid.Column="2" Content="✕" Width="36" Height="36" Padding="0"
+              Background="Transparent" BorderThickness="0"
+              Foreground="{StaticResource BrushTextSecondary}"
+              Command="{Binding CloseCommand}"
+              ToolTip.Tip="返回主界面"/>
+    </Grid>
+
+    <Border Grid.Row="1" CornerRadius="10" Padding="16,12" Margin="0,0,0,16"
+            BorderThickness="1"
+            BorderBrush="{StaticResource BrushBorder}"
+            Background="{StaticResource BrushBgPanel}">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <Ellipse Grid.Column="0" Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,12,0"
+                 Fill="{Binding OverallStatusBrush}"/>
+        <StackPanel Grid.Column="1" Spacing="4">
+          <TextBlock Text="{Binding OverallStatusText}" FontSize="15" FontWeight="SemiBold"
+                     Foreground="{StaticResource BrushTextPrimary}"/>
+          <TextBlock Text="{Binding PlcStatusText}" FontSize="12"
+                     Foreground="{StaticResource BrushTextTertiary}"/>
+        </StackPanel>
+        <TextBlock Grid.Column="2" VerticalAlignment="Center" FontSize="13"
+                   Foreground="{StaticResource BrushTextSecondary}">
+          <Run Text="当前报警："/><Run Text="{Binding ActiveAlarmCount}" FontWeight="Bold"/>
+        </TextBlock>
+      </Grid>
+    </Border>
+
+    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+      <StackPanel Spacing="16">
+        <Border Background="{StaticResource BrushBgPanel}"
+                BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+                CornerRadius="10" Padding="16">
+          <Grid RowDefinitions="Auto,Auto">
+            <TextBlock Grid.Row="0" Text="实时监测数据" FontSize="14" FontWeight="SemiBold"
+                       Foreground="{StaticResource BrushTextPrimary}" Margin="0,0,0,12"/>
+            <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*,*">
+              <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,8,0">
+                <TextBlock Text="高压实际压力" FontSize="11" Foreground="{StaticResource BrushTextTertiary}"/>
+                <TextBlock Text="{Binding HighPressureText}" FontSize="16" FontWeight="SemiBold"
+                           FontFamily="{StaticResource MonoFont}" Foreground="{StaticResource BrushTextPrimary}"/>
+              </StackPanel>
+              <StackPanel Grid.Column="1" Spacing="4" Margin="0,0,8,0">
+                <TextBlock Text="低压实际压力" FontSize="11" Foreground="{StaticResource BrushTextTertiary}"/>
+                <TextBlock Text="{Binding LowPressureText}" FontSize="16" FontWeight="SemiBold"
+                           FontFamily="{StaticResource MonoFont}" Foreground="{StaticResource BrushTextPrimary}"/>
+              </StackPanel>
+              <StackPanel Grid.Column="2" Spacing="4" Margin="0,0,8,0">
+                <TextBlock Text="实际温度" FontSize="11" Foreground="{StaticResource BrushTextTertiary}"/>
+                <TextBlock Text="{Binding TemperatureText}" FontSize="16" FontWeight="SemiBold"
+                           FontFamily="{StaticResource MonoFont}" Foreground="{StaticResource BrushTextPrimary}"/>
+              </StackPanel>
+              <StackPanel Grid.Column="3" Spacing="4" Margin="0,0,8,0">
+                <TextBlock Text="实际液位" FontSize="11" Foreground="{StaticResource BrushTextTertiary}"/>
+                <TextBlock Text="{Binding LiquidLevelText}" FontSize="16" FontWeight="SemiBold"
+                           FontFamily="{StaticResource MonoFont}" Foreground="{StaticResource BrushTextPrimary}"/>
+              </StackPanel>
+              <StackPanel Grid.Column="4" Spacing="4">
+                <TextBlock Text="电机转速" FontSize="11" Foreground="{StaticResource BrushTextTertiary}"/>
+                <TextBlock Text="{Binding MotorSpeedText}" FontSize="16" FontWeight="SemiBold"
+                           FontFamily="{StaticResource MonoFont}" Foreground="{StaticResource BrushTextPrimary}"/>
+              </StackPanel>
+            </Grid>
+          </Grid>
+        </Border>
+
+        <Border Background="{StaticResource BrushBgPanel}"
+                BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+                CornerRadius="10" Padding="16">
+          <StackPanel Spacing="12">
+            <TextBlock Text="报警阈值参考" FontSize="14" FontWeight="SemiBold"
+                       Foreground="{StaticResource BrushTextPrimary}"/>
+            <Grid ColumnDefinitions="*,*">
+              <TextBlock Grid.Column="0" Text="{Binding LiquidLevelLimitText}" FontSize="12"
+                         Foreground="{StaticResource BrushTextSecondary}"/>
+              <TextBlock Grid.Column="1" Text="{Binding AlarmTempText, StringFormat=报警温度：{0}}"
+                         FontSize="12" Foreground="{StaticResource BrushTextSecondary}"/>
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <Border Background="{StaticResource BrushBgPanel}"
+                BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+                CornerRadius="10" Padding="16">
+          <Grid RowDefinitions="Auto,*">
+            <TextBlock Grid.Row="0" Text="故障诊断清单" FontSize="14" FontWeight="SemiBold"
+                       Foreground="{StaticResource BrushTextPrimary}" Margin="0,0,0,12"/>
+            <ItemsControl Grid.Row="1" ItemsSource="{Binding AlarmRows}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:FaultDiagnosisAlarmRow">
+                  <Border Margin="0,0,0,8" Padding="12,10" CornerRadius="8"
+                          BorderThickness="1"
+                          BorderBrush="{StaticResource BrushBorder}"
+                          Background="{StaticResource BrushBgWindow}">
+                    <Grid ColumnDefinitions="*,Auto,2*">
+                      <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="13" FontWeight="Medium"
+                                 Foreground="{StaticResource BrushTextPrimary}"
+                                 VerticalAlignment="Center" Margin="0,0,12,0"/>
+                      <Border Grid.Column="1" CornerRadius="4" Padding="10,4" MinWidth="56"
+                              Background="{Binding StatusBrush}" VerticalAlignment="Center" Margin="0,0,16,0">
+                        <TextBlock Text="{Binding StatusText}" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="White" HorizontalAlignment="Center"/>
+                      </Border>
+                      <TextBlock Grid.Column="2" Text="{Binding Suggestion}" FontSize="12"
+                                 Foreground="{StaticResource BrushTextSecondary}"
+                                 TextWrapping="Wrap" VerticalAlignment="Center"/>
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </Grid>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+
+    <TextBlock Grid.Row="3" Margin="0,12,0,0" FontSize="11"
+               Foreground="{StaticResource BrushTextTertiary}"
+               Text="说明：本界面实时读取 PLC 报警点位，帮助在设备异常时快速定位故障并给出处理建议。"/>
+  </Grid>
+</UserControl>

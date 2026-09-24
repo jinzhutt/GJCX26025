@@ -1,0 +1,131 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:PressureTestApp.UI.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1600" d:DesignHeight="900"
+             x:Class="PressureTestApp.UI.Views.HardwareCalibrationView"
+             x:DataType="vm:HardwareCalibrationViewModel"
+             Loaded="OnViewLoaded"
+             Unloaded="OnViewUnloaded">
+
+  <UserControl.Styles>
+    <Style Selector="TextBox.cal-field">
+      <Setter Property="MinWidth" Value="88"/>
+      <Setter Property="MinHeight" Value="36"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="TextAlignment" Value="Center"/>
+    </Style>
+  </UserControl.Styles>
+
+  <Grid RowDefinitions="Auto,*">
+    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+      <TextBlock Text="硬件校准" FontSize="{StaticResource FsH1}"
+                 FontWeight="SemiBold" Foreground="{StaticResource BrushPrimary}"
+                 VerticalAlignment="Center"/>
+      <Button Grid.Column="1" Content="✕" Width="36" Height="36" Padding="0"
+              Background="Transparent" BorderThickness="0"
+              Foreground="{StaticResource BrushTextSecondary}"
+              Command="{Binding CloseCommand}"
+              ToolTip.Tip="返回试验主界面"/>
+    </Grid>
+
+    <Grid Grid.Row="1" ColumnDefinitions="*,6,*">
+      <!-- 左：输入检测 -->
+      <Grid Grid.Column="0" RowDefinitions="Auto,Auto,*">
+        <TextBlock Grid.Row="0" Text="输入检测" FontSize="{StaticResource FsH2}"
+                   FontWeight="SemiBold" Foreground="{StaticResource BrushTextPrimary}"
+                   Margin="0,0,0,12"/>
+
+        <Border Grid.Row="1" Background="{StaticResource BrushPrimary}" Padding="0,8" Margin="0,0,0,8">
+          <Grid ColumnDefinitions="120,*,*,*,Auto,Auto">
+            <TextBlock Grid.Column="1" Text="测定值" Foreground="{StaticResource BrushBgTitlebar}"
+                       HorizontalAlignment="Center" FontWeight="SemiBold" Margin="0,0,8,0"/>
+            <TextBlock Grid.Column="2" Text="零点值" Foreground="{StaticResource BrushBgTitlebar}"
+                       HorizontalAlignment="Center" FontWeight="SemiBold" Margin="0,0,8,0"/>
+            <TextBlock Grid.Column="3" Text="增益值" Foreground="{StaticResource BrushBgTitlebar}"
+                       HorizontalAlignment="Center" FontWeight="SemiBold" Margin="0,0,8,0"/>
+            <!-- 占位与数据行「确定/重置」同宽，保证 * 列与下方一致 -->
+            <Button Grid.Column="4" Content="确定" MinWidth="72" Margin="0,0,8,0"
+                    Opacity="0" IsHitTestVisible="False" Focusable="False"/>
+            <Button Grid.Column="5" Content="重置" MinWidth="72"
+                    Opacity="0" IsHitTestVisible="False" Focusable="False"/>
+          </Grid>
+        </Border>
+
+        <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Hidden">
+          <ItemsControl ItemsSource="{Binding InputChannels}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:HardwareCalibrationChannelViewModel">
+                <Grid ColumnDefinitions="120,*,*,*,Auto,Auto" Margin="0,0,0,10">
+                  <TextBlock Grid.Column="0" Text="{Binding RowTitle}" VerticalAlignment="Center"
+                             FontSize="12" Foreground="{StaticResource BrushTextSecondary}"
+                             TextWrapping="Wrap" Margin="0,0,8,0"/>
+                  <TextBox Grid.Column="1" Classes="cal-field" Text="{Binding MeasuredText}"
+                           Margin="0,0,8,0" IsReadOnly="True"/>
+                  <TextBox Grid.Column="2" Classes="cal-field" Text="{Binding ZeroText}"
+                           Margin="0,0,8,0"/>
+                  <TextBox Grid.Column="3" Classes="cal-field" Text="{Binding GainText}"
+                           Margin="0,0,8,0"/>
+                  <Button Grid.Column="4" Content="确定" MinWidth="72"
+                          Margin="0,0,8,0" Command="{Binding ConfirmCommand}"/>
+                  <Button Grid.Column="5" Content="重置" MinWidth="72"
+                          Command="{Binding ResetCommand}"/>
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </Grid>
+
+      <!-- 分隔 -->
+      <Border Grid.Column="1" Width="2" HorizontalAlignment="Center"
+              Background="{StaticResource BrushPrimary}" Margin="8,0"/>
+
+      <!-- 右：输出检测 -->
+      <Grid Grid.Column="2" RowDefinitions="Auto,Auto,Auto,*">
+        <TextBlock Grid.Row="0" Text="输出检测" FontSize="{StaticResource FsH2}"
+                   FontWeight="SemiBold" Foreground="{StaticResource BrushTextPrimary}"
+                   Margin="0,0,0,12"/>
+        <!--
+        <Border Grid.Row="1" Background="{StaticResource BrushPrimary}" Padding="0,8" Margin="0,0,0,8">
+          <Grid ColumnDefinitions="120,*,*,*,Auto,Auto">
+            <TextBlock Grid.Column="1" Text="测定值" Foreground="{StaticResource BrushBgTitlebar}"
+                       HorizontalAlignment="Center" FontWeight="SemiBold" Margin="0,0,8,0"/>
+            <TextBlock Grid.Column="2" Text="零点值" Foreground="{StaticResource BrushBgTitlebar}"
+                       HorizontalAlignment="Center" FontWeight="SemiBold" Margin="0,0,8,0"/>
+            <TextBlock Grid.Column="3" Text="增益值" Foreground="{StaticResource BrushBgTitlebar}"
+                       HorizontalAlignment="Center" FontWeight="SemiBold" Margin="0,0,8,0"/>
+            <Button Grid.Column="4" Content="确定" MinWidth="72" Margin="0,0,8,0"
+                    Opacity="0" IsHitTestVisible="False" Focusable="False"/>
+            <Button Grid.Column="5" Content="重置" MinWidth="72"
+                    Opacity="0" IsHitTestVisible="False" Focusable="False"/>
+          </Grid>
+        </Border>
+
+        <Grid Grid.Row="2" ColumnDefinitions="120,*,*,*,Auto,Auto" Margin="0,0,0,16"
+              DataContext="{Binding OutputChannel}">
+          <TextBlock Grid.Column="0" Text="{Binding RowTitle}" VerticalAlignment="Center"
+                     FontSize="12" Foreground="{StaticResource BrushTextSecondary}"
+                     Margin="0,0,8,0"/>
+          <TextBox Grid.Column="1" Classes="cal-field" Text="{Binding MeasuredText}"
+                   Margin="0,0,8,0" IsReadOnly="True"/>
+          <TextBox Grid.Column="2" Classes="cal-field" Text="{Binding ZeroText}"
+                   Margin="0,0,8,0"/>
+          <TextBox Grid.Column="3" Classes="cal-field" Text="{Binding GainText}"
+                   Margin="0,0,8,0"/>
+          <Button Grid.Column="4" Content="确定" MinWidth="72"
+                  Margin="0,0,8,0" Command="{Binding ConfirmCommand}"/>
+          <Button Grid.Column="5" Content="重置" MinWidth="72"
+                  Command="{Binding ResetCommand}"/>
+        </Grid>
+        -->
+        <TextBlock Grid.Row="3" Text="计算公式：测定值 = 工程值 * 增益值 - 零点值"
+                   FontSize="13" Foreground="{StaticResource BrushTextSecondary}"
+                   TextWrapping="Wrap" VerticalAlignment="Top"/>
+      </Grid>
+    </Grid>
+  </Grid>
+</UserControl>

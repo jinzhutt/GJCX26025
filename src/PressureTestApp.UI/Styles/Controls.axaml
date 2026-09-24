@@ -1,0 +1,92 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- 默认字体 -->
+  <Style Selector="TextBlock">
+    <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
+    <Setter Property="Foreground" Value="{StaticResource BrushTextPrimary}"/>
+  </Style>
+
+  <Style Selector="TextBox">
+    <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
+    <Setter Property="Background" Value="{StaticResource BrushBgInput}"/>
+    <Setter Property="BorderBrush" Value="{StaticResource BrushBorder}"/>
+    <Setter Property="Foreground" Value="{StaticResource BrushTextPrimary}"/>
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="Height" Value="40"/>
+    <Setter Property="Padding" Value="12,0"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+  </Style>
+
+  <Style Selector="ComboBox">
+    <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
+    <Setter Property="Background" Value="{StaticResource BrushBgInput}"/>
+    <Setter Property="BorderBrush" Value="{StaticResource BrushBorder}"/>
+    <Setter Property="Foreground" Value="{StaticResource BrushTextPrimary}"/>
+    <Setter Property="MinHeight" Value="36"/>
+  </Style>
+
+  <!-- 主按钮 -->
+  <Style Selector="Button">
+    <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
+    <Setter Property="FontSize" Value="14"/>
+    <Setter Property="FontWeight" Value="Medium"/>
+    <Setter Property="Background" Value="{StaticResource BrushBgInput}"/>
+    <Setter Property="BorderBrush" Value="{StaticResource BrushBorder}"/>
+    <Setter Property="Foreground" Value="{StaticResource BrushTextSecondary}"/>
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="Padding" Value="18,0"/>
+    <Setter Property="Height" Value="38"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="Cursor" Value="Hand"/>
+  </Style>
+
+  <Style Selector="Button:pointerover">
+    <Setter Property="Background" Value="{StaticResource BrushBgPanel}"/>
+    <Setter Property="BorderBrush" Value="{StaticResource BrushBorderHover}"/>
+    <Setter Property="Foreground" Value="{StaticResource BrushTextPrimary}"/>
+  </Style>
+
+  <Style Selector="Button.primary">
+    <Setter Property="Background" Value="{StaticResource BrushPrimary}"/>
+    <Setter Property="BorderBrush" Value="{StaticResource BrushPrimary}"/>
+    <Setter Property="Foreground" Value="{StaticResource BrushBgTitlebar}"/>
+  </Style>
+  <Style Selector="Button.primary:pointerover">
+    <Setter Property="Background" Value="{StaticResource BrushPrimaryHover}"/>
+    <Setter Property="BorderBrush" Value="{StaticResource BrushPrimaryHover}"/>
+    <Setter Property="Foreground" Value="{StaticResource BrushBgTitlebar}"/>
+  </Style>
+
+  <Style Selector="Button.danger">
+    <Setter Property="Background" Value="{StaticResource BrushDanger}"/>
+    <Setter Property="BorderBrush" Value="{StaticResource BrushDanger}"/>
+    <Setter Property="Foreground" Value="White"/>
+  </Style>
+
+  <Style Selector="Button.success">
+    <Setter Property="Background" Value="{StaticResource BrushSuccess}"/>
+    <Setter Property="BorderBrush" Value="{StaticResource BrushSuccess}"/>
+    <Setter Property="Foreground" Value="{StaticResource BrushBgTitlebar}"/>
+  </Style>
+
+  <Style Selector="Button.info">
+    <Setter Property="Background" Value="{StaticResource BrushInfo}"/>
+    <Setter Property="BorderBrush" Value="{StaticResource BrushInfo}"/>
+    <Setter Property="Foreground" Value="{StaticResource BrushBgTitlebar}"/>
+  </Style>
+
+  <Style Selector="Button.large">
+    <Setter Property="Height" Value="46"/>
+    <Setter Property="Padding" Value="26,0"/>
+    <Setter Property="FontSize" Value="15"/>
+  </Style>
+
+  <Style Selector="Button.small">
+    <Setter Property="Height" Value="30"/>
+    <Setter Property="Padding" Value="12,0"/>
+    <Setter Property="FontSize" Value="12"/>
+  </Style>
+
+</Styles>

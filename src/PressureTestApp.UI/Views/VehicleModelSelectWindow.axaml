@@ -1,0 +1,91 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:PressureTestApp.UI.ViewModels"
+        xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
+        mc:Ignorable="d" d:DesignWidth="920" d:DesignHeight="620"
+        x:Class="PressureTestApp.UI.Views.VehicleModelSelectWindow"
+        x:DataType="vm:VehicleModelSelectViewModel"
+        Width="920" Height="620" MinWidth="720" MinHeight="480"
+        WindowStartupLocation="CenterOwner"
+        SystemDecorations="None"
+        Background="Transparent"
+        Title="车型选择">
+
+  <Border CornerRadius="10"
+          Background="{StaticResource BrushBgWindow}"
+          BoxShadow="0 16 48 0 #80000000"
+          ClipToBounds="True">
+
+    <Grid RowDefinitions="48,Auto,*,Auto">
+
+      <!-- 标题栏 -->
+      <Border Grid.Row="0"
+              Background="{StaticResource BrushPrimary}"
+              PointerPressed="OnTitleBarPointerPressed">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock Text="车型选择" Margin="16,0" FontSize="15" FontWeight="SemiBold"
+                     Foreground="White" VerticalAlignment="Center"/>
+          <Button Grid.Column="1" Content="✕" Width="36" Height="36" Padding="0"
+                  Margin="0,0,8,0" Background="Transparent" BorderThickness="0"
+                  Foreground="White" Click="OnCloseClick"/>
+        </Grid>
+      </Border>
+
+      <!-- 筛选：仅「产品类型」+ 搜索（无「产品型号」下拉） -->
+      <Border Grid.Row="1" Padding="16,12"
+              Background="{StaticResource BrushBgPanel}"
+              BorderBrush="{StaticResource BrushBorder}" BorderThickness="0,0,0,1">
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <TextBlock Text="产品类型" VerticalAlignment="Center"
+                     Foreground="{StaticResource BrushTextPrimary}" FontSize="13"/>
+          <ComboBox Width="220" MinHeight="32" FontSize="12"
+                    ItemsSource="{Binding ProductTypeOptions}"
+                    SelectedItem="{Binding SelectedProductTypeFilter}"/>
+          <Button MinWidth="88" Padding="12,6" Content="搜索"
+                  Command="{Binding SearchCommand}"/>
+        </StackPanel>
+      </Border>
+
+      <Border Grid.Row="2" Margin="16,12,16,8" Padding="0"
+              Background="#FF2A2F37" CornerRadius="6"
+              BorderBrush="{StaticResource BrushBorder}" BorderThickness="1">
+        <dg:DataGrid ItemsSource="{Binding FilteredRows}"
+                     SelectedItem="{Binding SelectedRow}"
+                     AutoGenerateColumns="False"
+                     IsReadOnly="True"
+                     GridLinesVisibility="Horizontal"
+                     HeadersVisibility="Column"
+                     MinHeight="200">
+          <dg:DataGrid.Columns>
+            <DataGridTextColumn Header="产品类型" Binding="{Binding ProductType}" Width="*"/>
+            <DataGridTextColumn Header="产品型号" Binding="{Binding ProductModel}" Width="2*"/>
+            <DataGridTextColumn Header="备注" Binding="{Binding Remark}" Width="*"/>
+          </dg:DataGrid.Columns>
+        </dg:DataGrid>
+      </Border>
+
+      <!-- 底部 -->
+      <Border Grid.Row="3" Padding="16,10,16,16"
+              Background="{StaticResource BrushBgPanel}"
+              BorderBrush="{StaticResource BrushBorder}" BorderThickness="0,1,0,0">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="▲" MinWidth="40" Padding="8,6"
+                    Command="{Binding MoveSelectionUpCommand}"/>
+            <Button Content="▼" MinWidth="40" Padding="8,6"
+                    Command="{Binding MoveSelectionDownCommand}"/>
+          </StackPanel>
+          <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
+            <Button MinWidth="88" Padding="12,8" Content="取消"
+                    Command="{Binding CancelCommand}"/>
+            <Button Classes="primary" MinWidth="120" Padding="16,8"
+                    Content="选择实行"
+                    Command="{Binding ConfirmCommand}"/>
+          </StackPanel>
+        </Grid>
+      </Border>
+    </Grid>
+  </Border>
+</Window>

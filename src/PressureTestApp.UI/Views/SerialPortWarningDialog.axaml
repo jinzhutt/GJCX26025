@@ -1,0 +1,43 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="PressureTestApp.UI.Views.SerialPortWarningDialog"
+        Title="提示"
+        Width="400"
+        SizeToContent="Height"
+        MinHeight="150"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="#FFFFFFFF">
+  <!-- 与全局 Dark 主题隔离，避免内容区成黑底、深色字看不见 -->
+  <Grid RowDefinitions="Auto,*" Background="#FFFFFFFF">
+    <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Margin="20,20,20,16" Background="#FFFFFFFF">
+      <Panel Grid.Column="0" Margin="0,0,12,0" VerticalAlignment="Top">
+        <TextBlock x:Name="WarningIcon" Text="⚠" FontSize="32" Foreground="#FFE8A200"
+                   VerticalAlignment="Top"/>
+        <Border x:Name="InfoIconPanel" Width="36" Height="36" CornerRadius="18"
+                Background="#FF2B6CB0" VerticalAlignment="Top" IsVisible="False">
+          <TextBlock Text="i" FontSize="18" FontWeight="SemiBold" Foreground="White"
+                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+      </Panel>
+      <TextBlock x:Name="MessageText" Grid.Column="1"
+                 Text="未检测到可用串口！"
+                 FontSize="14"
+                 Foreground="#FF000000"
+                 TextWrapping="Wrap"
+                 VerticalAlignment="Center"/>
+    </Grid>
+    <Border Grid.Row="1" Background="#FFF0F0F0" BorderBrush="#FFD0D0D0" BorderThickness="0,1,0,0" Padding="12,10">
+      <Button Content="确定"
+              Width="88"
+              Height="28"
+              HorizontalAlignment="Right"
+              Foreground="#FF000000"
+              Background="#FFE1E1E1"
+              BorderBrush="#FFADADAD"
+              BorderThickness="1"
+              IsDefault="True"
+              Click="OnOkClick"/>
+    </Border>
+  </Grid>
+</Window>

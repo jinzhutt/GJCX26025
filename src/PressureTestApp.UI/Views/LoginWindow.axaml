@@ -1,0 +1,224 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:PressureTestApp.UI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
+        x:Class="PressureTestApp.UI.Views.LoginWindow"
+        x:DataType="vm:LoginViewModel"
+        Width="1400" Height="900"
+        MinWidth="1100" MinHeight="700"
+        WindowStartupLocation="CenterScreen"
+        SystemDecorations="None"
+        Background="Transparent"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="-1"
+        Title="登录 · 轴退卸工作站">
+
+  <Border CornerRadius="10"
+          Background="{StaticResource BrushBgWindow}"
+          BoxShadow="0 16 48 0 #80000000"
+          ClipToBounds="True">
+    <Grid ColumnDefinitions="*,520">
+
+      <!-- 左侧装饰区 -->
+      <Border Grid.Column="0" Background="{StaticResource BrushBgTitlebar}">
+        <Grid>
+          <Rectangle>
+            <Rectangle.Fill>
+              <RadialGradientBrush Center="20%,30%" GradientOrigin="20%,30%" RadiusX="50%" RadiusY="50%">
+                <GradientStop Offset="0" Color="#24EF9A4E"/>
+                <GradientStop Offset="1" Color="#00EF9A4E"/>
+              </RadialGradientBrush>
+            </Rectangle.Fill>
+          </Rectangle>
+
+          <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="20">
+            <Border Width="160" Height="160" CornerRadius="36"
+                    Background="{StaticResource BrushPrimary}"
+                    BoxShadow="0 20 50 0 #4DEF9A4E">
+              <TextBlock Text="退卸" FontSize="50" FontWeight="Bold"
+                         Foreground="{StaticResource BrushBgTitlebar}"
+                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+
+            <TextBlock Text="轴承退卸工作站"
+                       FontSize="32" FontWeight="Medium"
+                       HorizontalAlignment="Center"
+                       Foreground="{StaticResource BrushTextPrimary}"/>
+
+            <TextBlock TextWrapping="Wrap" TextAlignment="Center"
+                       MaxWidth="480"
+                       FontSize="14" LineHeight="26"
+                       Foreground="{StaticResource BrushTextTertiary}">
+              检修设备：轴承退卸机<LineBreak/>
+              
+            </TextBlock>
+
+            <!-- 三个特性卡 -->
+          <!--  <Grid ColumnDefinitions="*,*,*" Width="440" Margin="0,40,0,0">
+              <Border Grid.Column="0" Background="#0FFFFFFF" CornerRadius="10" Padding="14"
+                      BorderBrush="{StaticResource BrushBorder}" BorderThickness="1" Margin="6,0">
+                <StackPanel HorizontalAlignment="Center" Spacing="4">
+                  <TextBlock Text="4" FontSize="22" FontWeight="Bold"
+                             FontFamily="{StaticResource MonoFont}"
+                             Foreground="{StaticResource BrushPrimary}"
+                             HorizontalAlignment="Center"/>
+                  <TextBlock Text="独立回路" FontSize="11"
+                             Foreground="{StaticResource BrushTextTertiary}"
+                             HorizontalAlignment="Center"/>
+                </StackPanel>
+              </Border>
+              <Border Grid.Column="1" Background="#0FFFFFFF" CornerRadius="10" Padding="14"
+                      BorderBrush="{StaticResource BrushBorder}" BorderThickness="1" Margin="6,0">
+                <StackPanel HorizontalAlignment="Center" Spacing="4">
+                  <TextBlock Text="10kV" FontSize="22" FontWeight="Bold"
+                             FontFamily="{StaticResource MonoFont}"
+                             Foreground="{StaticResource BrushPrimary}"
+                             HorizontalAlignment="Center"/>
+                  <TextBlock Text="最高电压" FontSize="11"
+                             Foreground="{StaticResource BrushTextTertiary}"
+                             HorizontalAlignment="Center"/>
+                </StackPanel>
+              </Border>
+              <Border Grid.Column="2" Background="#0FFFFFFF" CornerRadius="10" Padding="14"
+                      BorderBrush="{StaticResource BrushBorder}" BorderThickness="1" Margin="6,0">
+                <StackPanel HorizontalAlignment="Center" Spacing="4">
+                  <TextBlock Text="500mA" FontSize="22" FontWeight="Bold"
+                             FontFamily="{StaticResource MonoFont}"
+                             Foreground="{StaticResource BrushPrimary}"
+                             HorizontalAlignment="Center"/>
+                  <TextBlock Text="保护电流" FontSize="11"
+                             Foreground="{StaticResource BrushTextTertiary}"
+                             HorizontalAlignment="Center"/>
+                </StackPanel>
+              </Border>
+            </Grid>-->
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <!-- 右侧表单区 -->
+      <Grid Grid.Column="1" Background="{StaticResource BrushBgWindow}">
+        <!-- 自绘窗口控制按钮 -->
+        <StackPanel Orientation="Horizontal" Spacing="4"
+                    HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Margin="0,12,12,0">
+          <Button Width="30" Height="30" Padding="0"
+                  Background="Transparent" BorderThickness="0"
+                  Foreground="{StaticResource BrushTextSecondary}"
+                  Content="−"
+                  Click="OnMinimizeClick"/>
+          <Button Width="30" Height="30" Padding="0"
+                  Background="Transparent" BorderThickness="0"
+                  Foreground="{StaticResource BrushTextSecondary}"
+                  Content="✕"
+                  Click="OnCloseClick"/>
+        </StackPanel>
+
+        <StackPanel VerticalAlignment="Center" Margin="60,0,60,0" Spacing="0">
+          <TextBlock Text="欢迎登录"
+                     FontSize="30" FontWeight="Medium"
+                     Foreground="{StaticResource BrushTextPrimary}"
+                     Margin="0,0,0,8"/>
+          <TextBlock Text="请使用工号密码登录系统"
+                     FontSize="14"
+                     Foreground="{StaticResource BrushTextTertiary}"
+                     Margin="0,0,0,32"/>
+
+          <!-- Tab 切换：密码 / 人脸 -->
+          <Border BorderBrush="{StaticResource BrushBorder}" BorderThickness="0,0,0,1"
+                  Margin="0,0,0,28">
+            <StackPanel Orientation="Horizontal" Spacing="4">
+              <Button Background="Transparent" BorderThickness="0"
+                      Padding="22,12" Height="44"
+                      Command="{Binding SwitchToPasswordModeCommand}">
+                <Button.Styles>
+                  <Style Selector="Button">
+                    <Setter Property="Foreground" Value="{StaticResource BrushTextTertiary}"/>
+                  </Style>
+                </Button.Styles>
+                <TextBlock>
+                  <Run Text="工号密码" FontSize="15"/>
+                </TextBlock>
+              </Button>
+              <Button Background="Transparent" BorderThickness="0"
+                      Padding="22,12" Height="44"
+                      Command="{Binding SwitchToFaceModeCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <TextBlock Text="人脸识别" FontSize="15"
+                             Foreground="{StaticResource BrushTextDisabled}"/>
+                  <Border Background="#28F4A261" CornerRadius="8" Padding="6,1">
+                    <TextBlock Text="待接入" FontSize="10"
+                               Foreground="{StaticResource BrushWarning}"/>
+                  </Border>
+                </StackPanel>
+              </Button>
+            </StackPanel>
+          </Border>
+
+          <!-- 工号 -->
+          <TextBlock Text="工号" FontSize="12"
+                     Foreground="{StaticResource BrushTextSecondary}"
+                     Margin="0,0,0,6"/>
+          <TextBox Text="{Binding UserId}"
+                   Watermark="请输入工号"
+                   Height="46" FontSize="15"
+                   Margin="0,0,0,16"/>
+
+          <!-- 密码 -->
+          <TextBlock Text="密码" FontSize="12"
+                     Foreground="{StaticResource BrushTextSecondary}"
+                     Margin="0,0,0,6"/>
+          <TextBox Text="{Binding Password}"
+                   Watermark="请输入密码"
+                   PasswordChar="●"
+                   Height="46" FontSize="15"
+                   Margin="0,0,0,12"/>
+
+          <!-- 选项 -->
+          <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,24">
+            <CheckBox Grid.Column="0"
+                      IsChecked="{Binding RememberPassword}"
+                      Content="记住密码"
+                      FontSize="13"
+                      Foreground="{StaticResource BrushTextSecondary}"/>
+          </Grid>
+
+          <!-- 错误提示 -->
+          <TextBlock Text="{Binding ErrorMessage}"
+                     IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}"
+                     Foreground="{StaticResource BrushDanger}"
+                     FontSize="13"
+                     Margin="0,0,0,12"/>
+
+          <!-- 登录按钮 -->
+          <Button Classes="primary"
+                  Content="登 录"
+                  Command="{Binding LoginCommand}"
+                  IsEnabled="{Binding !IsLoading}"
+                  Height="52" FontSize="15"
+                  HorizontalAlignment="Stretch"
+                  Margin="0,0,0,14"/>
+
+          <!-- 现场仅 MES，暂不使用 EPE 设备认证入口
+          <Button Content="{Binding DeviceAuthHint}"
+                  Command="{Binding OpenDeviceAuthCommand}"
+                  IsVisible="{Binding ShowDeviceAuthButton}"
+                  Background="Transparent"
+                  Foreground="{StaticResource BrushTextSecondary}"
+                  Height="44" FontSize="13"
+                  HorizontalAlignment="Stretch"/>
+          -->
+        </StackPanel>
+
+        <TextBlock Text="v2.0.0 · UoS V20-AMD64 · .NET 8 · 达梦 DM8"
+                   FontSize="11"
+                   Foreground="{StaticResource BrushTextDisabled}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Bottom"
+                   Margin="0,0,0,24"/>
+      </Grid>
+    </Grid>
+  </Border>
+</Window>

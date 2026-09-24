@@ -1,0 +1,61 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:PressureTestApp.UI.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1600" d:DesignHeight="900"
+             x:Class="PressureTestApp.UI.Views.DeviceInspectionView"
+             x:DataType="vm:DeviceInspectionViewModel">
+
+  <Grid RowDefinitions="Auto,*">
+    <!-- 标题栏 -->
+    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+      <TextBlock Text="设备检查" FontSize="{StaticResource FsH1}"
+                 FontWeight="SemiBold" Foreground="{StaticResource BrushPrimary}"
+                 VerticalAlignment="Center"/>
+      <Button Grid.Column="1" Content="✕" Width="36" Height="36" Padding="0"
+              Background="Transparent" BorderThickness="0"
+              Foreground="{StaticResource BrushTextSecondary}"
+              Command="{Binding CloseCommand}"
+              ToolTip.Tip="返回试验主界面"/>
+    </Grid>
+
+    <!-- 计数区：数字在框内水平居中，右侧「归零」 -->
+    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Auto">
+      <ItemsControl ItemsSource="{Binding Counters}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <UniformGrid Columns="4"/>
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:DeviceInspectionCounterItem">
+            <StackPanel Margin="8,8" Spacing="8">
+              <Border Background="{StaticResource BrushBgWindow}"
+                      BorderBrush="{StaticResource BrushPrimary}" BorderThickness="2"
+                      CornerRadius="6" Padding="10,12" MinHeight="72">
+                <Grid VerticalAlignment="Center">
+                  <TextBlock Text="{Binding Count}"
+                             FontSize="32" FontWeight="Bold"
+                             FontFamily="{StaticResource MonoFont}"
+                             Foreground="{StaticResource BrushTextPrimary}"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center"/>
+                  <Button Content="归零" MinWidth="72" MinHeight="36"
+                          Padding="12,0"
+                          HorizontalAlignment="Right"
+                          VerticalAlignment="Center"
+                          Command="{Binding ResetCommand}"/>
+                </Grid>
+              </Border>
+              <TextBlock Text="{Binding CounterLabel}" FontSize="12"
+                         Foreground="{StaticResource BrushTextSecondary}"
+                         TextAlignment="Center" TextWrapping="Wrap"/>
+            </StackPanel>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

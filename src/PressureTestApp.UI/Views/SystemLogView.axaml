@@ -1,0 +1,129 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:PressureTestApp.UI.ViewModels"
+             xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
+             mc:Ignorable="d" d:DesignWidth="1600" d:DesignHeight="900"
+             x:Class="PressureTestApp.UI.Views.SystemLogView"
+             x:DataType="vm:SystemLogViewModel">
+
+  <UserControl.Styles>
+    <Style Selector="DataGridColumnHeader">
+      <Setter Property="Background" Value="{StaticResource BrushPrimary}"/>
+      <Setter Property="Foreground" Value="{StaticResource BrushBgTitlebar}"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Padding" Value="10,8"/>
+      <Setter Property="MinHeight" Value="40"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="DataGridColumnHeader ContentPresenter#PART_ContentPresenter TextBlock">
+      <Setter Property="TextWrapping" Value="Wrap"/>
+      <Setter Property="TextAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="DataGridRow">
+      <Setter Property="MinHeight" Value="36"/>
+    </Style>
+  </UserControl.Styles>
+
+  <Grid RowDefinitions="Auto,Auto,*,Auto">
+    <!-- 页头 -->
+    <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,0,0,16">
+      <StackPanel VerticalAlignment="Center" Spacing="4">
+        <TextBlock Text="系统日志" FontSize="{StaticResource FsH1}"
+                   FontWeight="SemiBold" Foreground="{StaticResource BrushPrimary}"/>
+        <TextBlock Text="查看应用程序运行日志，支持按日期、级别筛选与关键字搜索" FontSize="12"
+                   Foreground="{StaticResource BrushTextTertiary}"/>
+      </StackPanel>
+      <Button Grid.Column="1" Content="刷新" MinWidth="88" MinHeight="36" Margin="0,0,8,0"
+              Command="{Binding RefreshCommand}" VerticalAlignment="Center"/>
+      <Button Grid.Column="2" Content="导出" MinWidth="88" MinHeight="36" Margin="0,0,8,0"
+              Command="{Binding ExportCommand}" VerticalAlignment="Center"/>
+      <Button Grid.Column="3" Content="✕" Width="36" Height="36" Padding="0"
+              Background="Transparent" BorderThickness="0"
+              Foreground="{StaticResource BrushTextSecondary}"
+              Command="{Binding CloseCommand}"
+              ToolTip.Tip="返回主界面"/>
+    </Grid>
+
+    <!-- 筛选栏 -->
+    <Border Grid.Row="1" CornerRadius="10" Padding="16,12" Margin="0,0,0,16"
+            BorderThickness="1"
+            BorderBrush="{StaticResource BrushBorder}"
+            Background="{StaticResource BrushBgPanel}">
+      <Grid ColumnDefinitions="Auto,180,Auto,180,*,Auto,Auto,Auto">
+        <TextBlock Grid.Column="0" Text="日志文件" FontSize="12"
+                   Foreground="{StaticResource BrushTextSecondary}"
+                   VerticalAlignment="Center" Margin="0,0,10,0"/>
+        <ComboBox Grid.Column="1" ItemsSource="{Binding LogFileOptions}"
+                  SelectedItem="{Binding SelectedLogFile}"
+                  MinHeight="36" VerticalAlignment="Center" Margin="0,0,16,0"/>
+
+        <TextBlock Grid.Column="2" Text="日志级别" FontSize="12"
+                   Foreground="{StaticResource BrushTextSecondary}"
+                   VerticalAlignment="Center" Margin="0,0,10,0"/>
+        <ComboBox Grid.Column="3" ItemsSource="{Binding LevelFilterOptions}"
+                  SelectedItem="{Binding SelectedLevelFilter}"
+                  MinHeight="36" VerticalAlignment="Center" Margin="0,0,16,0"/>
+
+        <TextBox Grid.Column="4" Text="{Binding SearchKeyword}"
+                 Watermark="搜索关键字（时间、级别、模块、内容）"
+                 MinHeight="36" VerticalAlignment="Center" Margin="0,0,8,0"/>
+        <Button Grid.Column="5" Content="清除" MinWidth="72" MinHeight="36"
+                Command="{Binding ClearSearchCommand}" Margin="0,0,8,0"/>
+        <TextBlock Grid.Column="6" Text="{Binding StatusText}" FontSize="12"
+                   Foreground="{StaticResource BrushTextTertiary}"
+                   VerticalAlignment="Center"/>
+      </Grid>
+    </Border>
+
+    <!-- 日志列表 -->
+    <Border Grid.Row="2"
+            Background="{StaticResource BrushBgPanel}"
+            BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+            CornerRadius="10" Padding="0">
+      <dg:DataGrid ItemsSource="{Binding LogEntries}"
+                   AutoGenerateColumns="False"
+                   CanUserReorderColumns="False"
+                   CanUserResizeColumns="True"
+                   CanUserSortColumns="True"
+                   GridLinesVisibility="Horizontal"
+                   HeadersVisibility="Column"
+                   IsReadOnly="True"
+                   SelectionMode="Single">
+        <dg:DataGrid.Columns>
+          <dg:DataGridTextColumn Header="时间" Binding="{Binding Timestamp}" Width="180"/>
+          <dg:DataGridTemplateColumn Header="级别" Width="80">
+            <dg:DataGridTemplateColumn.CellTemplate>
+              <DataTemplate x:DataType="vm:SystemLogEntry">
+                <Border CornerRadius="4" Padding="8,3" HorizontalAlignment="Center"
+                        Background="{Binding LevelBrush}">
+                  <TextBlock Text="{Binding Level}" FontSize="11" FontWeight="SemiBold"
+                             Foreground="White" HorizontalAlignment="Center"/>
+                </Border>
+              </DataTemplate>
+            </dg:DataGridTemplateColumn.CellTemplate>
+          </dg:DataGridTemplateColumn>
+          <dg:DataGridTextColumn Header="模块" Binding="{Binding Logger}" Width="140"/>
+          <dg:DataGridTextColumn Header="内容" Binding="{Binding Message}" Width="*"/>
+        </dg:DataGrid.Columns>
+      </dg:DataGrid>
+    </Border>
+
+    <!-- 底部说明 -->
+    <Grid Grid.Row="3" ColumnDefinitions="*,Auto" Margin="0,12,0,0">
+      <TextBlock Grid.Column="0" FontSize="11"
+                 Foreground="{StaticResource BrushTextTertiary}"
+                 TextWrapping="Wrap"
+                 Text="说明：日志文件由 NLog 自动写入本地目录，单文件上限 10MB，最多保留 30 个归档。切换日志文件会重新读取；切换级别或搜索关键字会在当前文件内筛选。"/>
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6"
+                  VerticalAlignment="Center" Margin="16,0,0,0">
+        <TextBlock Text="日志目录：" FontSize="11"
+                   Foreground="{StaticResource BrushTextTertiary}"/>
+        <TextBlock Text="{Binding LogDirectoryPath}" FontSize="11"
+                   FontFamily="{StaticResource MonoFont}"
+                   Foreground="{StaticResource BrushTextSecondary}"/>
+      </StackPanel>
+    </Grid>
+  </Grid>
+</UserControl>

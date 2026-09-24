@@ -1,0 +1,44 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        d:DesignWidth="360" d:DesignHeight="180"
+        x:Class="PressureTestApp.UI.Views.InfoNoticeWindow"
+        Title="提示"
+        Width="360" Height="180" CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource BrushBgWindow}"
+        SystemDecorations="None">
+
+  <Border BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+          CornerRadius="10" ClipToBounds="True"
+          BoxShadow="0 12 40 0 #80000000">
+    <Grid RowDefinitions="44,*,Auto">
+      <Border Grid.Row="0" Background="{StaticResource BrushBgTitlebar}"
+              BorderBrush="{StaticResource BrushBorder}" BorderThickness="0,0,0,1">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock x:Name="TitleText" Grid.Column="0" Text="提示" Margin="16,0"
+                     FontSize="15" FontWeight="SemiBold"
+                     Foreground="{StaticResource BrushPrimary}"
+                     VerticalAlignment="Center"/>
+          <Button Grid.Column="1" Content="✕" Width="36" Height="36" Padding="0"
+                  Margin="0,0,8,0" Background="Transparent" BorderThickness="0"
+                  Foreground="{StaticResource BrushTextSecondary}"
+                  Click="OnOkClick"/>
+        </Grid>
+      </Border>
+
+      <TextBlock x:Name="BodyText" Grid.Row="1" Text="保存成功"
+                 FontSize="16"
+                 Foreground="White"
+                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                 TextWrapping="Wrap" TextAlignment="Center" Margin="24,0"
+                 Padding="12"/>
+
+      <Button Grid.Row="2" Content="确定" MinWidth="120"
+              HorizontalAlignment="Center" Margin="0,0,0,20"
+              Click="OnOkClick"/>
+    </Grid>
+  </Border>
+</Window>

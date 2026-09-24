@@ -1,0 +1,1225 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="using:System"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:PressureTestApp.UI.ViewModels"
+        xmlns:views="using:PressureTestApp.UI.Views"
+        xmlns:conv="using:PressureTestApp.UI.Converters"
+        xmlns:lvc="using:LiveChartsCore.SkiaSharpView.Avalonia"
+        xmlns:lc="using:LiveChartsCore.Measure"
+        mc:Ignorable="d" d:DesignWidth="1920" d:DesignHeight="1080"
+        x:Class="PressureTestApp.UI.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Width="1920" Height="1080"
+        MinWidth="1366" MinHeight="768"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        SystemDecorations="None"
+        Background="{StaticResource BrushBgWindow}"
+        Title="轴退卸工作站">
+
+  <Window.Resources>
+    <conv:BoolBrushConverter x:Key="TabSelBg"
+                             TrueBrush="{StaticResource BrushPrimary}"
+                             FalseBrush="{StaticResource BrushBgInput}"/>
+    <conv:BoolBrushConverter x:Key="TabSelFg"
+                             TrueBrush="White"
+                             FalseBrush="{StaticResource BrushTextSecondary}"/>
+    <conv:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
+    <conv:InvertedCountToVisibilityConverter x:Key="InvertedCountToVisibilityConverter"/>
+  </Window.Resources>
+
+  <Window.Styles>
+    <!-- 侧边栏导航项 -->
+    <Style Selector="Button.nav-item">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Foreground" Value="{StaticResource BrushTextSecondary}"/>
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
+      <Setter Property="Padding" Value="14,10"/>
+    </Style>
+    <Style Selector="Button.nav-item:pointerover">
+      <Setter Property="Background" Value="{StaticResource BrushBgWindow}"/>
+      <Setter Property="Foreground" Value="{StaticResource BrushTextPrimary}"/>
+    </Style>
+    <Style Selector="Button.nav-item.active">
+      <Setter Property="Background" Value="#1FEF9A4E"/>
+      <Setter Property="Foreground" Value="{StaticResource BrushPrimary}"/>
+    </Style>
+    <Style Selector="Button.nav-item.danger">
+      <Setter Property="Foreground" Value="{StaticResource BrushDanger}"/>
+    </Style>
+    <Style Selector="Button.nav-item.danger:pointerover">
+      <Setter Property="Background" Value="#19E14B4A"/>
+    </Style>
+
+    <!-- 耐压曲线旁「任务管理」竖条按钮 -->
+    <Style Selector="Button.task-mgmt-btn">
+      <!-- 全局 Controls.axaml 里 Button 默认 Height=38，会阻止在 UniformGrid 里纵向拉伸 -->
+      <Setter Property="Height" Value="{x:Static sys:Double.NaN}"/>
+      <Setter Property="Background" Value="#FF2A2F37"/>
+      <Setter Property="BorderBrush" Value="{StaticResource BrushBorder}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Foreground" Value="{StaticResource BrushTextPrimary}"/>
+      <Setter Property="CornerRadius" Value="6"/>
+      <Setter Property="Padding" Value="12,8"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="VerticalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="MinHeight" Value="42"/>
+    </Style>
+    <Style Selector="Button.task-mgmt-btn:pointerover">
+      <Setter Property="Background" Value="#FF353B45"/>
+    </Style>
+
+    <!-- 模式切换按钮 -->
+    <Style Selector="Button.mode-tab">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Padding" Value="12,6"/>
+      <Setter Property="Height" Value="34"/>
+      <Setter Property="FontSize" Value="15"/>
+      <Setter Property="CornerRadius" Value="6"/>
+      <Setter Property="Foreground" Value="{StaticResource BrushTextSecondary}"/>
+    </Style>
+    <Style Selector="Button.mode-tab.active-online">
+      <Setter Property="Background" Value="#2E6EBE28"/>
+      <Setter Property="Foreground" Value="{StaticResource BrushSuccess}"/>
+    </Style>
+    <Style Selector="Button.mode-tab.active-offline">
+      <Setter Property="Background" Value="#2EB4B2A9"/>
+      <Setter Property="Foreground" Value="{StaticResource BrushTextPrimary}"/>
+    </Style>
+    <Style Selector="Button.mode-tab.active-import">
+      <Setter Property="Background" Value="#2E85B7EB"/>
+      <Setter Property="Foreground" Value="{StaticResource BrushInfo}"/>
+    </Style>
+
+    <!-- 参数设定：回路单选，橙色圈与主题一致 -->
+    <Style Selector="RadioButton.param-loop-radio">
+      <Setter Property="Foreground" Value="{StaticResource BrushPrimary}"/>
+    </Style>
+
+    <!-- 数据卡数值 -->
+    <Style Selector="TextBlock.metric-value">
+      <Setter Property="FontFamily" Value="{StaticResource MonoFont}"/>
+      <Setter Property="FontSize" Value="32"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Foreground" Value="{StaticResource BrushTextPrimary}"/>
+    </Style>
+    <Style Selector="TextBlock.metric-value.primary">
+      <Setter Property="Foreground" Value="{StaticResource BrushPrimary}"/>
+    </Style>
+    <Style Selector="TextBlock.metric-value.muted">
+      <Setter Property="Foreground" Value="{StaticResource BrushTextTertiary}"/>
+    </Style>
+    <Style Selector="TextBlock.metric-label">
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Foreground" Value="{StaticResource BrushTextTertiary}"/>
+    </Style>
+    <Style Selector="TextBlock.metric-sub">
+      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="Foreground" Value="{StaticResource BrushTextDisabled}"/>
+    </Style>
+
+    <!-- ⭐ 手动设置卡片样式（重做美化） -->
+    <Style Selector="Border.param-card">
+      <Setter Property="Background" Value="{StaticResource BrushBgInput}"/>
+      <Setter Property="BorderBrush" Value="{StaticResource BrushBorder}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="Padding" Value="16,10"/>
+      <Setter Property="MinWidth" Value="220"/>
+    </Style>
+
+    <!-- NumericUpDown 优化 -->
+    <Style Selector="NumericUpDown.param-input">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="MinHeight" Value="32"/>
+      <Setter Property="FontSize" Value="20"/>
+      <Setter Property="FontFamily" Value="{StaticResource MonoFont}"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Foreground" Value="{StaticResource BrushPrimary}"/>
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
+    </Style>
+    <Style Selector="NumericUpDown.param-input /template/ TextBox">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Padding" Value="0"/>
+    </Style>
+    <!-- 右侧「模拟量输出」：大号白字、水平居中（含模板内编辑框） -->
+    <Style Selector="NumericUpDown.param-input.param-sidebar">
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="FontSize" Value="32"/>
+      <Setter Property="MinHeight" Value="52"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Foreground" Value="White"/>
+    </Style>
+    <Style Selector="NumericUpDown.param-input.param-sidebar /template/ TextBox">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="TextAlignment" Value="Center"/>
+      <Setter Property="Foreground" Value="White"/>
+    </Style>
+    <Style Selector="TextBlock.analog-out-label">
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="TextAlignment" Value="Left"/>
+      <Setter Property="HorizontalAlignment" Value="Left"/>
+    </Style>
+
+    <!-- 试验信息行（标签:值 同行） -->
+    <Style Selector="StackPanel.info-row">
+      <Setter Property="Orientation" Value="Horizontal"/>
+    </Style>
+  </Window.Styles>
+
+  <!-- 顶层 3 行 2 列：标题栏 / 主区域 / 状态栏（模式栏在右侧主区域内） -->
+  <Grid RowDefinitions="50,*,32" ColumnDefinitions="240,*">
+       
+    <!-- ============ 标题栏 ============ -->
+    <Border Grid.Row="0" Grid.ColumnSpan="2"
+            Background="{StaticResource BrushBgTitlebar}"
+            BorderBrush="{StaticResource BrushBorder}"
+            BorderThickness="0,0,0,1"
+            PointerPressed="OnTitleBarPointerPressed">
+      <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto">
+        <Border Grid.Column="0" Width="32" Height="32" CornerRadius="7"
+                Background="{StaticResource BrushPrimary}"
+                Margin="16,0,12,0"
+                VerticalAlignment="Center">
+          <TextBlock Text="退卸" FontSize="16" FontWeight="Bold"
+                     Foreground="{StaticResource BrushBgTitlebar}"
+                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+
+        <TextBlock Grid.Column="1" Text="轴退卸工作站"
+                   FontSize="15" FontWeight="Medium"
+                   Foreground="{StaticResource BrushTextPrimary}"
+                   VerticalAlignment="Center"/>
+
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8"
+                    VerticalAlignment="Center" Margin="20,0,0,0">
+          <Ellipse Width="8" Height="8" Fill="{StaticResource BrushSuccess}"/>
+          <TextBlock Text="设备运行正常" FontSize="12"
+                     Foreground="{StaticResource BrushSuccess}"
+                     VerticalAlignment="Center"/>
+        </StackPanel>
+
+        <TextBlock Grid.Column="4" Text="{Binding ClockText}"
+                   FontSize="13"
+                   FontFamily="{StaticResource MonoFont}"
+                   Foreground="{StaticResource BrushTextTertiary}"
+                   VerticalAlignment="Center" Margin="0,0,16,0"/>
+
+        <StackPanel Grid.Column="5" Orientation="Horizontal" Spacing="4"
+                    VerticalAlignment="Center" Margin="0,0,8,0">
+          <Button Width="30" Height="30" Padding="0" Background="Transparent" BorderThickness="0"
+                  Foreground="{StaticResource BrushTextSecondary}" Content="−" Click="OnMinimizeClick"/>
+          <Button Width="30" Height="30" Padding="0" Background="Transparent" BorderThickness="0"
+                  Foreground="{StaticResource BrushTextSecondary}" Content="▢" Click="OnMaximizeClick"/>
+          <Button Width="30" Height="30" Padding="0" Background="Transparent" BorderThickness="0"
+                  Foreground="{StaticResource BrushTextSecondary}" Content="✕" Click="OnCloseClick"/>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- ============ 侧边栏 ============ -->
+    <Border Grid.Row="1" Grid.RowSpan="2" Grid.Column="0"
+            Background="{StaticResource BrushBgSidebar}"
+            BorderBrush="{StaticResource BrushBorder}"
+            BorderThickness="0,0,1,0">
+      <Grid RowDefinitions="Auto,Auto,*">
+        <!-- 用户卡 -->
+        <StackPanel Grid.Row="0" Margin="16">
+          <Border Width="56" Height="56" CornerRadius="28" HorizontalAlignment="Center" Margin="0,0,0,10">
+            <Border.Background>
+              <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                <GradientStop Offset="0" Color="#FFEF9A4E"/>
+                <GradientStop Offset="1" Color="#FFD4753C"/>
+              </LinearGradientBrush>
+            </Border.Background>
+            <TextBlock Text="{Binding AvatarLetter}"
+                       FontSize="22" FontWeight="Bold"
+                       Foreground="{StaticResource BrushBgTitlebar}"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+          </Border>
+          <TextBlock Text="{Binding UserName}" FontSize="14" FontWeight="Medium"
+                     Foreground="{StaticResource BrushTextPrimary}"
+                     HorizontalAlignment="Center" Margin="0,0,0,4"/>
+          <TextBlock FontSize="11" Foreground="{StaticResource BrushTextTertiary}"
+                     HorizontalAlignment="Center">
+            <Run Text="工号 "/><Run Text="{Binding UserId}"/>
+          </TextBlock>
+        </StackPanel>
+
+        <Border Grid.Row="1" Background="{StaticResource BrushBorder}" Height="1"/>
+
+        <ScrollViewer Grid.Row="2" Padding="10" x:CompileBindings="False">
+          <StackPanel Orientation="Vertical">
+            <Button Classes="nav-item" Classes.active="{Binding IsMainTestNavSelected}"
+                    HorizontalAlignment="Stretch" Margin="0,0,0,3" Content="主界面"
+                    Command="{Binding SelectNavCommand}" CommandParameter="main"/>
+            <Button Classes="nav-item" Classes.active="{Binding IsReportManagementNavSelected}"
+                    HorizontalAlignment="Stretch" Margin="0,0,0,3" Content="历史报表"
+                    Command="{Binding SelectNavCommand}" CommandParameter="reportManagement"/>
+            <Button Classes="nav-item" Classes.active="{Binding IsUserManagementNavSelected}"
+                    HorizontalAlignment="Stretch" Margin="0,0,0,3" Content="数据管理"
+                    Command="{Binding SelectNavCommand}" CommandParameter="userManagement"/>
+            <Button Classes="nav-item" Classes.active="{Binding IsSystemLogNavSelected}"
+                    HorizontalAlignment="Stretch" Margin="0,0,0,3" Content="系统日志"
+                    Command="{Binding SelectNavCommand}" CommandParameter="systemLog"/>
+            <Button Classes="nav-item" Classes.active="{Binding IsFaultDiagnosisNavSelected}"
+                    HorizontalAlignment="Stretch" Margin="0,0,0,3" Content="错误诊断"
+                    Command="{Binding SelectNavCommand}" CommandParameter="faultDiagnosis"/>
+            <Border Background="{StaticResource BrushBorder}" Height="1" Margin="14,10"/>
+            <Button Classes="nav-item danger" Content="退出系统"
+                    HorizontalAlignment="Stretch" Click="OnLogoutClick"/>
+          </StackPanel>
+        </ScrollViewer>
+      </Grid>
+    </Border>
+
+    <!-- ============ 右侧：试验主界面 / 其它导航内容 ============ -->
+    <Grid Grid.Row="1" Grid.Column="1">
+
+    <!-- ============ 内容区：试验主界面三栏（图一） ============ -->
+    <!-- 单行 *：原先 Auto,* 且仅一个子元素，空 * 行不参与子项高度分配，中间栏曲线 * 行易被压扁导致轴区裁切 -->
+    <Grid Margin="4,8,16,6"
+          x:Name="ContentGrid"
+          IsVisible="{Binding ShowMainTestContent}"
+          RowDefinitions="*">
+      <Grid RowDefinitions="Auto,*">
+
+      <!-- ▼ 行 0：Excel 横幅（仅 Excel 导入模式且已加载文件） -->
+      <Border Grid.Row="0"
+              IsVisible="{Binding ShowExcelBanner}"
+              Background="#1F85B7EB"
+              BorderBrush="#5bdf92eb" BorderThickness="1"
+              CornerRadius="10" Padding="10,12"
+              Margin="0,0,0,8">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18"
+                  Background="#56e77aeb" VerticalAlignment="Center">
+            <TextBlock Text="📊" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+          </Border>
+          <StackPanel Grid.Column="1" Margin="12,0" VerticalAlignment="Center">
+            <TextBlock FontSize="13" Foreground="{StaticResource BrushTextPrimary}">
+              <Run Text="已加载 Excel："/>
+              <Run Text="{Binding ExcelFileName}" FontFamily="{StaticResource MonoFont}"
+                   Foreground="{StaticResource BrushInfo}"/>
+              <Run Text=" · 共 "/><Run Text="{Binding ExcelTaskCount}"/><Run Text=" 条任务"/>
+            </TextBlock>
+            <TextBlock FontSize="11" Foreground="{StaticResource BrushTextTertiary}"
+                       Text="来源：标准任务模板 · 已识别有效数据" Margin="0,2,0,0"/>
+          </StackPanel>
+          <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+            <Button Classes="small" Content="查看任务列表"/>
+            <Button Classes="small" Content="重新导入" Click="OnReimportExcelClick"/>
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <Grid Grid.Row="1" ColumnDefinitions="348,*" MinHeight="0">
+        <!-- 整列不滚动：* 行吃掉剩余高度，底部「重新导入 Excel」等始终落在可视区内；过程日志仅在中间块内滚动 -->
+        <!-- 底部拉杆/快慢速按钮固定 Auto 可见；工艺配方占剩余高度可收缩 -->
+        <Grid Grid.Column="0" Margin="0,0,8,0" MinHeight="0"
+              RowDefinitions="Auto,Auto,Auto,*,Auto">
+            <!-- 离线 / 在线：控制信息录入是否可编辑 -->
+            <Border Grid.Row="0" Margin="0,0,0,8" Background="{StaticResource BrushBgPanel}" CornerRadius="8"
+                    BorderBrush="{StaticResource BrushBorder}" BorderThickness="1" Padding="8,8">
+              <StackPanel Spacing="6">
+                <Border Background="{StaticResource BrushBgWindow}" CornerRadius="8"
+                        BorderBrush="{StaticResource BrushBorder}" BorderThickness="1" Padding="4">
+                  <UniformGrid Columns="2">
+                    <Button Classes="mode-tab" Classes.active-offline="{Binding IsOfflineMode}"
+                            Content="离线模式" Margin="2,0"
+                            Command="{Binding SwitchModeCommand}" CommandParameter="offline"
+                            ToolTip.Tip="可手动编辑信息录入"/>
+                    <Button Classes="mode-tab" Classes.active-online="{Binding IsOnlineMode}"
+                            Content="在线模式" Margin="2,0"
+                            Command="{Binding SwitchModeCommand}" CommandParameter="online"
+                            ToolTip.Tip="信息录入只读，须从任务查看选择任务映射"/>
+                  </UniformGrid>
+                </Border>
+                <TextBlock FontSize="11" TextWrapping="Wrap"
+                           Foreground="{StaticResource BrushTextTertiary}"
+                           Text="{Binding ModeHint}"/>
+              </StackPanel>
+            </Border>
+
+            <!-- 信息录入：车型/车号/工件编号仅离线可编；操作员在线/离线均可 -->
+            <Border Grid.Row="1" Margin="0,0,0,8" Background="{StaticResource BrushBgPanel}" CornerRadius="8"
+                    BorderBrush="{StaticResource BrushBorder}" BorderThickness="1" ClipToBounds="True">
+              <Grid RowDefinitions="Auto,Auto,Auto,*">
+                <Border Grid.Row="0" Background="{StaticResource BrushPrimary}" Padding="8,6">
+                  <TextBlock Text="信息录入" Foreground="White" FontSize="14" FontWeight="SemiBold"/>
+                </Border>
+                <Border Grid.Row="1" Background="#FF353942" Padding="6,4">
+                  <TextBlock Text="车型选择" FontSize="13" Foreground="White"
+                             HorizontalAlignment="Center"/>
+                </Border>
+                <Grid Grid.Row="2" Margin="8,6,8,4" ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto">
+                  <TextBlock Grid.Row="0" Grid.Column="0" Text="车型" FontSize="13" VerticalAlignment="Center"
+                             Margin="0,0,8,6" Foreground="White"/>
+                  <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding InfoEntryBearingTypeText}"
+                           Watermark="请选择" MinHeight="32" FontSize="11" Margin="0,0,0,6"
+                           Background="{StaticResource BrushBgInput}" BorderBrush="{StaticResource BrushBorder}"
+                           IsEnabled="{Binding CanEditInfoAndParameters}"
+                           Tag="车型" GotFocus="OnMainTestParameterGotFocus" LostFocus="OnMainTestParameterLostFocus"/>
+                  <TextBlock Grid.Row="1" Grid.Column="0" Text="车号" FontSize="13" VerticalAlignment="Center"
+                             Margin="0,0,8,6" Foreground="White"/>
+                  <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding InfoEntryTrainCarText}"
+                           Watermark="请输入" MinHeight="32" FontSize="11" Margin="0,0,0,6"
+                           Background="{StaticResource BrushBgInput}" BorderBrush="{StaticResource BrushBorder}"
+                           IsEnabled="{Binding CanEditInfoAndParameters}"
+                           Tag="车号" GotFocus="OnMainTestParameterGotFocus" LostFocus="OnMainTestParameterLostFocus"/>
+                  <TextBlock Grid.Row="2" Grid.Column="0" Text="工件编号" FontSize="13" VerticalAlignment="Center"
+                             Margin="0,0,8,6" Foreground="White"/>
+                  <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding InfoEntryWorkpieceCodeText}"
+                           Watermark="请输入" MinHeight="32" FontSize="11" Margin="0,0,0,6"
+                           Background="{StaticResource BrushBgInput}" BorderBrush="{StaticResource BrushBorder}"
+                           IsEnabled="{Binding CanEditInfoAndParameters}"
+                           Tag="工件编号" GotFocus="OnMainTestParameterGotFocus" LostFocus="OnMainTestParameterLostFocus"/>
+                  <TextBlock Grid.Row="3" Grid.Column="0" Text="操作员" FontSize="13" VerticalAlignment="Center"
+                             Margin="0,0,8,0" Foreground="White"/>
+                  <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding InfoEntryOperatorText}"
+                           Watermark="可手动输入或点击获取" MinHeight="32" FontSize="11" Margin="0,0,6,0"
+                           Background="{StaticResource BrushBgInput}" BorderBrush="{StaticResource BrushBorder}"/>
+                  <Button Grid.Row="3" Grid.Column="2" Content="获取" MinWidth="56" MinHeight="32" Padding="8,0"
+                          FontSize="12" VerticalAlignment="Center" Cursor="Hand"
+                          Command="{Binding FetchOperatorCommand}"
+                          Background="{StaticResource BrushBgInput}" BorderBrush="{StaticResource BrushBorder}"
+                          Foreground="White"/>
+                </Grid>
+                <Button Grid.Row="3" Margin="8,0,8,8" Content="车型选择…" FontSize="14"
+                        Foreground="White"
+                        Click="OnVehicleModelSelectClick"
+                        IsEnabled="{Binding CanEditInfoAndParameters}"
+                        HorizontalAlignment="Stretch" Padding="8,6"
+                        Background="{StaticResource BrushBgInput}" BorderBrush="{StaticResource BrushBorder}"/>
+              </Grid>
+            </Border>
+
+            <!-- <Border Grid.Row="1" Margin="0,0,0,8" Background="{StaticResource BrushBgPanel}" CornerRadius="8"
+                    BorderBrush="{StaticResource BrushBorder}" BorderThickness="1" ClipToBounds="True"
+                    IsEnabled="{Binding CanEditInfoAndParameters}">
+              <StackPanel Spacing="0">
+                <Border Background="{StaticResource BrushPrimary}" Padding="10,8">
+                  <TextBlock Text="参数设定" Foreground="White" FontSize="14" FontWeight="SemiBold"
+                             HorizontalAlignment="Center"/>
+                </Border>
+                [参考图：2×2，每格 = 单选 + 白色「回路N」标签 + 右侧深色输入框]
+                <Grid Margin="10,12,10,12" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
+                  <Grid Grid.Row="0" Grid.Column="0" Margin="0,0,6,12" ColumnDefinitions="Auto,Auto,*">
+                    <RadioButton Grid.Column="0" GroupName="ParamLoop" Classes="param-loop-radio" VerticalAlignment="Center"
+                                 IsChecked="{Binding IsParameterLoop1, Mode=TwoWay}" Content="" Margin="0,0,8,0"/>
+                    <TextBlock Grid.Column="1" Text="回路1" FontSize="13" Foreground="White"
+                               VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBox Grid.Column="2" Text="{Binding LoopPresetText1}" MinHeight="40" FontSize="18" FontWeight="SemiBold"
+                             VerticalAlignment="Center" Padding="8,4"
+                             Background="{StaticResource BrushBgInput}" BorderBrush="{StaticResource BrushBorder}"
+                             Tag="回路1" GotFocus="OnMainTestParameterGotFocus" LostFocus="OnMainTestParameterLostFocus"/>
+                  </Grid>
+                  <Grid Grid.Row="0" Grid.Column="1" Margin="6,0,0,12" ColumnDefinitions="Auto,Auto,*">
+                    <RadioButton Grid.Column="0" GroupName="ParamLoop" Classes="param-loop-radio" VerticalAlignment="Center"
+                                 IsChecked="{Binding IsParameterLoop2, Mode=TwoWay}" Content="" Margin="0,0,8,0"/>
+                    <TextBlock Grid.Column="1" Text="回路2" FontSize="13" Foreground="White"
+                               VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBox Grid.Column="2" Text="{Binding LoopPresetText2}" MinHeight="40" FontSize="18" FontWeight="SemiBold"
+                             VerticalAlignment="Center" Padding="8,4"
+                             Background="{StaticResource BrushBgInput}" BorderBrush="{StaticResource BrushBorder}"
+                             Tag="回路2" GotFocus="OnMainTestParameterGotFocus" LostFocus="OnMainTestParameterLostFocus"/>
+                  </Grid>
+                  <Grid Grid.Row="1" Grid.Column="0" Margin="0,0,6,0" ColumnDefinitions="Auto,Auto,*">
+                    <RadioButton Grid.Column="0" GroupName="ParamLoop" Classes="param-loop-radio" VerticalAlignment="Center"
+                                 IsChecked="{Binding IsParameterLoop3, Mode=TwoWay}" Content="" Margin="0,0,8,0"/>
+                    <TextBlock Grid.Column="1" Text="回路3" FontSize="13" Foreground="White"
+                               VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBox Grid.Column="2" Text="{Binding LoopPresetText3}" MinHeight="40" FontSize="18" FontWeight="SemiBold"
+                             VerticalAlignment="Center" Padding="8,4"
+                             Background="{StaticResource BrushBgInput}" BorderBrush="{StaticResource BrushBorder}"
+                             Tag="回路3" GotFocus="OnMainTestParameterGotFocus" LostFocus="OnMainTestParameterLostFocus"/>
+                  </Grid>
+                  <Grid Grid.Row="1" Grid.Column="1" Margin="6,0,0,0" ColumnDefinitions="Auto,Auto,*">
+                    <RadioButton Grid.Column="0" GroupName="ParamLoop" Classes="param-loop-radio" VerticalAlignment="Center"
+                                 IsChecked="{Binding IsParameterLoop4, Mode=TwoWay}" Content="" Margin="0,0,8,0"/>
+                    <TextBlock Grid.Column="1" Text="回路4" FontSize="13" Foreground="White"
+                               VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBox Grid.Column="2" Text="{Binding LoopPresetText4}" MinHeight="40" FontSize="18" FontWeight="SemiBold"
+                             VerticalAlignment="Center" Padding="8,4"
+                             Background="{StaticResource BrushBgInput}" BorderBrush="{StaticResource BrushBorder}"
+                             Tag="回路4" GotFocus="OnMainTestParameterGotFocus" LostFocus="OnMainTestParameterLostFocus"/>
+                  </Grid>
+                </Grid>
+              </StackPanel>
+            </Border> -->
+            
+            <Border Grid.Row="2" Margin="0,0,0,8"
+                    Background="{StaticResource BrushBgPanel}" CornerRadius="8"
+                    BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+                    MinHeight="80" MaxHeight="120">
+              <Grid RowDefinitions="Auto,*">
+                <Border Grid.Row="0" Background="{StaticResource BrushPrimary}" Padding="8,6">
+                  <TextBlock Text="试验信息过程" Foreground="White" FontSize="14" FontWeight="SemiBold"/>
+                </Border>
+                <Border Grid.Row="1" Background="{StaticResource BrushBgWindow}" MinHeight="0">
+                  <ScrollViewer x:Name="TestProcessLogScrollViewer"
+                                HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding TestProcessLogLines}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <TextBlock Text="{Binding}" FontFamily="{StaticResource MonoFont}" FontSize="13"
+                                     Foreground="White" Margin="8,4,8,0" TextWrapping="Wrap"/>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </ScrollViewer>
+                </Border>
+              </Grid>
+            </Border>
+
+            <!-- 工艺配方设定（占剩余高度，避免挤掉底部按钮） -->
+            <Border x:Name="AnalogOutputPanel" Grid.Row="3" Margin="0,0,0,8" VerticalAlignment="Stretch"
+                    Background="{StaticResource BrushBgPanel}" CornerRadius="8"
+                    BorderBrush="{StaticResource BrushBorder}" BorderThickness="1" ClipToBounds="True"
+                    MinHeight="200">
+              <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+              <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="Auto,210,Auto">
+                <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Background="{StaticResource BrushPrimary}" Padding="12,10">
+                  <TextBlock Text="工艺配方" Foreground="White" FontSize="16" FontWeight="SemiBold"
+                             HorizontalAlignment="Center" TextAlignment="Center"/>
+                </Border>
+                <TextBlock Grid.Row="1" Grid.Column="0" Classes="analog-out-label" Text="参数：" Margin="10,6,8,4" VerticalAlignment="Center"/>
+                <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding ParameterSectionNames}"
+                          SelectedItem="{Binding SelectedParameterSection}"
+                          Width="150" Height="32" HorizontalAlignment="Center"
+                          Background="{StaticResource BrushBgInput}" Foreground="White"/>
+                <TextBlock Grid.Row="2" Grid.Column="0" Classes="analog-out-label" Text="目标压力(MPa)：" Margin="10,6,8,4" VerticalAlignment="Center"/>
+                <NumericUpDown Grid.Row="2" Grid.Column="1" x:Name="DurationInput" Classes="param-input" VerticalAlignment="Center"
+                               Tag="Press" Tapped="OnAnalogNumericTapped"
+                               Value="{Binding PlcPubP00, Converter={StaticResource NullToZeroConverter}}"
+                               Minimum="1" Maximum="30" Increment="1" FormatString="F1"
+                               FontSize="16" Height="32" Width="150" HorizontalAlignment="Center" HorizontalContentAlignment="Center"/>
+                <TextBlock Grid.Row="3" Grid.Column="0" Classes="analog-out-label" Text="位移补充值(mm)：" Margin="10,4,8,4" VerticalAlignment="Center"/>
+                <NumericUpDown Grid.Row="3" Grid.Column="1" x:Name="ProtectMaInput" Classes="param-input" VerticalAlignment="Center"
+                               Tag="DisplacementOffset" Tapped="OnAnalogNumericTapped"
+                               Value="{Binding PlcPubP04, Converter={StaticResource NullToZeroConverter}}"
+                               Minimum="0" Maximum="400" Increment="0.1" FormatString="F1"
+                               FontSize="16" Height="32" Width="150" HorizontalAlignment="Center" HorizontalContentAlignment="Center"/>
+                <TextBlock Grid.Row="4" Grid.Column="0" Classes="analog-out-label" Text="开始减速压力(bar)：" Margin="10,4,8,4" VerticalAlignment="Center"/>
+                <NumericUpDown Grid.Row="4" Grid.Column="1" Classes="param-input" VerticalAlignment="Center"
+                               Tag="DecelPressure" Tapped="OnAnalogNumericTapped"
+                               Value="{Binding PlcPubP01, Converter={StaticResource NullToZeroConverter}}"
+                               Minimum="0" Maximum="500" Increment="0.1" FormatString="F1"
+                               FontSize="16" Height="32" Width="150" HorizontalAlignment="Center" HorizontalContentAlignment="Center"/>
+                <TextBlock Grid.Row="5" Grid.Column="0" Classes="analog-out-label" Text="高压浮动限制T：" Margin="10,4,8,4" VerticalAlignment="Center"/>
+                <NumericUpDown Grid.Row="5" Grid.Column="1" Classes="param-input" VerticalAlignment="Center"
+                               Tag="HighPressureLimit" Tapped="OnAnalogNumericTapped"
+                               Value="{Binding PlcPubP14, Converter={StaticResource NullToZeroConverter}}"
+                               Minimum="0" Maximum="999" Increment="0.1" FormatString="F1"
+                               FontSize="16" Height="32" Width="150" HorizontalAlignment="Center" HorizontalContentAlignment="Center"/>
+                <TextBlock Grid.Row="6" Grid.Column="0" Classes="analog-out-label" Text="反向时间(S)：" Margin="10,4,8,8" VerticalAlignment="Center"/>
+                <NumericUpDown Grid.Row="6" Grid.Column="1" Classes="param-input" VerticalAlignment="Center"
+                               Tag="ReverseTime" Tapped="OnAnalogNumericTapped"
+                               Value="{Binding PlcPubP15, Converter={StaticResource NullToZeroConverter}}"
+                               Minimum="0" Maximum="65535" Increment="1" FormatString="F0"
+                               FontSize="16" Height="32" Width="150" HorizontalAlignment="Center" HorizontalContentAlignment="Center"/>
+              </Grid>
+              </ScrollViewer>
+            </Border>
+
+            <!-- <Border Grid.Row="4" Margin="0,0,0,8" Background="{StaticResource BrushBgPanel}" CornerRadius="8"
+                    BorderBrush="{StaticResource BrushBorder}" BorderThickness="1">
+              <Grid RowDefinitions="Auto,*">
+                <Border Grid.Row="0" Background="{StaticResource BrushPrimary}" Padding="8,6">
+                  <TextBlock Text="语言播报" Foreground="White" FontSize="14" FontWeight="SemiBold"/>
+                </Border>
+                <Border Grid.Row="1" Background="{StaticResource BrushBgWindow}" MinHeight="56" Padding="10,8">
+                  <TextBlock Text="{Binding VoiceBroadcastText}" FontSize="13" TextWrapping="Wrap"
+                             Foreground="White"/>
+                </Border>
+              </Grid>
+            </Border> -->
+
+            <!-- <Border Grid.Row="5" Margin="0,0,0,8" Background="{StaticResource BrushBgPanel}" CornerRadius="8"
+                    BorderBrush="{StaticResource BrushBorder}" BorderThickness="1" Padding="10,8">
+              <StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                <TextBlock Text="{Binding RemainSeconds}" FontSize="32" FontWeight="Bold"
+                           FontFamily="{StaticResource MonoFont}" Foreground="{StaticResource BrushPrimary}"/>
+                <TextBlock Text="S" FontSize="20" FontWeight="Bold" VerticalAlignment="Bottom" Margin="0,0,0,4"
+                           Foreground="{StaticResource BrushTextSecondary}"/>
+              </StackPanel>
+              <TextBlock Text="试验时间" FontSize="12" HorizontalAlignment="Center" Margin="0,4,0,0"
+                         Foreground="White"/>
+              </StackPanel>
+            </Border> -->
+ 
+            <Grid Grid.Row="4" Margin="0,0,0,4" VerticalAlignment="Bottom" RowDefinitions="Auto,Auto">
+              <Grid Grid.Row="0" ColumnDefinitions="*,*" Margin="0,0,0,0">
+                <Border x:Name="PullRodUpBorder" Grid.Column="0" Background="Green" MinHeight="44" Height="44"
+                        HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                        CornerRadius="4" Cursor="Hand"
+                        PointerPressed="OnPullRodUpPressed"
+                        PointerReleased="OnPullRodUpReleased">
+                  <TextBlock Text="拉杆上行" HorizontalAlignment="Center" VerticalAlignment="Center"
+                             Foreground="White" FontSize="16"/>
+                </Border>
+                <Border x:Name="PullRodDownBorder" Grid.Column="1" Background="Green" Margin="4,0,0,0"
+                        MinHeight="44" Height="44"
+                        HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                        CornerRadius="4" Cursor="Hand"
+                        PointerPressed="OnPullRodDownPressed"
+                        PointerReleased="OnPullRodDownReleased">
+                  <TextBlock Text="拉杆下行" HorizontalAlignment="Center" VerticalAlignment="Center"
+                             Foreground="White" FontSize="16"/>
+                </Border>
+              </Grid>
+              <Grid Grid.Row="1" ColumnDefinitions="*,*" Margin="0,4,0,0">
+                <Button Grid.Column="0" Content="快速/慢速切换" Margin="0,0,4,0" MinHeight="44" Height="44" FontSize="16"
+                        IsEnabled="{Binding IsProcessControlEnabled}" Click="OnSpeedModeToggleClick">
+                  <Button.Styles>
+                    <Style Selector="Button">
+                      <Setter Property="Background" Value="DarkSlateGray"/>
+                      <Setter Property="Foreground" Value="White"/>
+                    </Style>
+                  </Button.Styles>
+                </Button>
+                <Button Grid.Column="1" Content="恢复默认参数" Margin="4,0,0,0" MinHeight="44" Height="44" FontSize="16"
+                        IsEnabled="{Binding IsProcessControlEnabled}" Click="OnRestoreDefaultParamsClick">
+                  <Button.Styles>
+                    <Style Selector="Button">
+                      <Setter Property="Background" Value="DarkSlateGray"/>
+                      <Setter Property="Foreground" Value="White"/>
+                    </Style>
+                  </Button.Styles>
+                </Button>
+              </Grid>
+            </Grid>
+             <!-- <StackPanel Grid.Row="1" Orientation="Vertical" Spacing="6" Margin="0,4,0,0">
+                <Button Classes="info" Content="重新导入 Excel" Click="OnReimportExcelClick" FontSize="13"
+                        IsVisible="False" HorizontalAlignment="Stretch"/>
+              </StackPanel>-->
+        </Grid>
+
+        <!-- 右栏加宽：曲线略收窄，给任务管理/电气监测更多空间 -->
+        <Grid Grid.Column="1" Margin="0,0,10,0" RowDefinitions="Auto,Auto,Auto,*" ColumnDefinitions="*,300" MinHeight="0">
+          <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="4" Margin="0,0,0,0">
+            <Button Padding="14,6" CornerRadius="6" FontSize="12" Cursor="Hand"
+                    BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+                    Background="{Binding IsProcessPanelTabSelected, Converter={StaticResource TabSelBg}}"
+                    Foreground="{Binding IsProcessPanelTabSelected, Converter={StaticResource TabSelFg}}"
+                    Command="{Binding SelectMainTestRightPanelTabCommand}" CommandParameter="Process"
+                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+              <TextBlock Text="工艺界面" FontWeight="SemiBold"/>
+            </Button>
+          <!--  <Button Padding="14,6" CornerRadius="6" FontSize="12" Cursor="Hand"
+                    BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+                    Background="{Binding IsCameraOnePanelTabSelected, Converter={StaticResource TabSelBg}}"
+                    Foreground="{Binding IsCameraOnePanelTabSelected, Converter={StaticResource TabSelFg}}"
+                    Command="{Binding SelectMainTestRightPanelTabCommand}" CommandParameter="CameraOne"
+                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+              <TextBlock Text="摄像头一"/>
+            </Button>-->
+          <!--  <Button Padding="14,6" CornerRadius="6" FontSize="12" Cursor="Hand"
+                    BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+                    Background="{Binding IsReportPanelTabSelected, Converter={StaticResource TabSelBg}}"
+                    Foreground="{Binding IsReportPanelTabSelected, Converter={StaticResource TabSelFg}}"
+                    Command="{Binding SelectMainTestRightPanelTabCommand}" CommandParameter="Report"
+                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+              <TextBlock Text="报表界面"/>
+            </Button>-->
+          </StackPanel>
+           <!-- PLC 连接状态指示 -->
+          <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,10,0"
+                      HorizontalAlignment="Right" VerticalAlignment="Center">
+            <Ellipse Width="10" Height="10" VerticalAlignment="Center"
+                     Fill="{Binding PlcStatusBrush}"/>
+            <TextBlock Margin="6,0,0,0" VerticalAlignment="Center" FontSize="12"
+                       Foreground="{StaticResource BrushTextPrimary}"
+                       Text="{Binding PlcStatusTextForPanel}"/>
+          </StackPanel>
+          <UniformGrid Grid.Row="1" Grid.Column="0" Columns="3" Rows="1" MinHeight="100" MaxHeight="120" VerticalAlignment="Stretch"
+                       Margin="0,0,10,0" IsVisible="{Binding IsProcessPanelTabSelected}">
+            <!-- 目标压力显示卡已隐藏
+            <Border Background="#FF2A2F37" BorderBrush="{Binding PlcPubP00Brush}" BorderThickness="2" CornerRadius="6"
+                    Padding="10,8" Margin="2,0" VerticalAlignment="Stretch">
+              <StackPanel VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                  <Ellipse Width="12" Height="12" VerticalAlignment="Center"
+                           Fill="{Binding PlcPubP00Brush}"/>
+                  <TextBlock Text="{Binding PlcPubP00, StringFormat={}{0:F1}}" FontSize="26" FontWeight="Bold"
+                             Margin="6,0,0,0" HorizontalAlignment="Center"
+                             Foreground="{StaticResource BrushTextPrimary}"/>
+                </StackPanel>
+                <TextBlock Text="目标压力(MPa)" FontSize="12" HorizontalAlignment="Center"
+                           Foreground="White" Margin="0,6,0,0"/>
+                <Grid Width="150" Height="6" Margin="0,8,0,0" HorizontalAlignment="Center">
+                  <Border Background="#FF3A3F47" CornerRadius="3"/>
+                  <Border HorizontalAlignment="Left" Width="{Binding TargetPressureBarWidth}"
+                          Background="{Binding PlcPubP00Brush}" CornerRadius="3"/>
+                </Grid>
+                <DockPanel Width="150" Margin="0,4,0,0" HorizontalAlignment="Center" LastChildFill="True">
+                  <TextBlock DockPanel.Dock="Left" Text="0" FontSize="10" Foreground="#FF9AA0A8"/>
+                  <TextBlock DockPanel.Dock="Right" Text="30" FontSize="10" Foreground="#FF9AA0A8"/>
+                  <TextBlock Text="{Binding TargetPressureProgressValue, StringFormat='{}{0:F0} / 30'}"
+                             FontSize="10" Foreground="#FF9AA0A8" HorizontalAlignment="Center"/>
+                </DockPanel>
+              </StackPanel>
+            </Border>
+            -->
+            <Border Background="#FF2A2F37" BorderBrush="{Binding PlcAiMai03Brush}" BorderThickness="2" CornerRadius="6"
+                    Padding="10,8" Margin="2,0" VerticalAlignment="Stretch">
+              <StackPanel VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                  <Ellipse Width="12" Height="12" VerticalAlignment="Center"
+                           Fill="{Binding PlcAiMai03Brush}"/>
+                  <TextBlock Text="{Binding PlcAiMai03, StringFormat={}{0:F1}}" FontSize="26" FontWeight="Bold"
+                             Margin="6,0,0,0" HorizontalAlignment="Center"
+                             Foreground="{StaticResource BrushTextPrimary}"/>
+                </StackPanel>
+                <TextBlock Text="实际位移(mm)" FontSize="12" HorizontalAlignment="Center"
+                           Foreground="White" Margin="0,6,0,0"/>
+                <Grid Width="150" Height="6" Margin="0,8,0,0" HorizontalAlignment="Center">
+                  <Border Background="#FF3A3F47" CornerRadius="3"/>
+                  <Border HorizontalAlignment="Left" Width="{Binding ActualDisplacementBarWidth}"
+                          Background="{Binding PlcAiMai03Brush}" CornerRadius="3"/>
+                </Grid>
+                <DockPanel Width="150" Margin="0,4,0,0" HorizontalAlignment="Center" LastChildFill="True">
+                  <TextBlock DockPanel.Dock="Left" Text="0" FontSize="10" Foreground="#FF9AA0A8"/>
+                  <TextBlock DockPanel.Dock="Right" Text="400" FontSize="10" Foreground="#FF9AA0A8"/>
+                  <TextBlock Text="{Binding ActualDisplacementProgressValue, StringFormat='{}{0:F0} / 400'}"
+                             FontSize="10" Foreground="#FF9AA0A8" HorizontalAlignment="Center"/>
+                </DockPanel>
+              </StackPanel>
+            </Border>
+            <Border Background="#FF2A2F37" BorderBrush="#FF5B6270" BorderThickness="1" CornerRadius="6"
+                    Padding="10,8" Margin="2,0" VerticalAlignment="Stretch">
+              <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="{Binding PlcPubP14, StringFormat={}{0:F1}}" FontSize="26" FontWeight="Bold"
+                           HorizontalAlignment="Center" Foreground="{StaticResource BrushTextPrimary}"/>
+                <TextBlock Text="高压浮动限制T" FontSize="12" HorizontalAlignment="Center"
+                           Foreground="White" Margin="0,6,0,0"/>
+              </StackPanel>
+            </Border>
+            <Border Background="#FF2A2F37" BorderBrush="#FF5B6270" BorderThickness="1" CornerRadius="6"
+                    Padding="10,8" Margin="2,0" VerticalAlignment="Stretch">
+              <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="{Binding PlcPubP01, StringFormat={}{0:F1}}" FontSize="26" FontWeight="Bold"
+                           HorizontalAlignment="Center" Foreground="{StaticResource BrushTextPrimary}"/>
+                <TextBlock Text="开始减速压力(bar)" FontSize="12" HorizontalAlignment="Center"
+                           Foreground="White" Margin="0,6,0,0"/>
+              </StackPanel>
+            </Border>
+          </UniformGrid>
+
+          <!-- 检测信号：横跨中间 + 右侧栏；仅工艺界面显示 -->
+          <Border Grid.Row="2" Grid.ColumnSpan="2" Margin="0,0,0,4" IsVisible="{Binding IsProcessPanelTabSelected}"
+                  Background="{StaticResource BrushBgPanel}"
+                  CornerRadius="10" Padding="8,0,8,0"
+                  ClipToBounds="False" VerticalAlignment="Top">
+            <Grid RowDefinitions="Auto,Auto">
+              <!-- 橙色标题条（与参考图一致） -->
+              <Border Grid.Row="0" Background="{StaticResource BrushPrimary}" Padding="8,5" CornerRadius="10,10,0,0">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <TextBlock Text="◉" FontSize="12" Foreground="White" VerticalAlignment="Center"/>
+                  <TextBlock Text="检测信号" FontSize="12" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
+                </StackPanel>
+              </Border>
+              
+              <!-- 信号灯：轴承退卸机点位 -->
+              <Grid Grid.Row="1" RowDefinitions="Auto" ColumnDefinitions="*,*,*,*"
+                    VerticalAlignment="Top" MinHeight="0" Margin="0,8,0,0">
+                <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Vertical" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="2,0">
+                  <Ellipse Width="40" Height="40" Stroke="{StaticResource BrushBorder}" StrokeThickness="2">
+                    <Ellipse.Fill>
+                      <SolidColorBrush Color="{Binding SignalColor_DI02}"/>
+                    </Ellipse.Fill>
+                  </Ellipse>
+                  <TextBlock Text="快慢速显示" FontSize="14" Foreground="White" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="104"/>
+                </StackPanel>
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="2,0">
+                  <Ellipse Width="40" Height="40" Stroke="{StaticResource BrushBorder}" StrokeThickness="2">
+                    <Ellipse.Fill>
+                      <SolidColorBrush Color="{Binding SignalColor_DI11}"/>
+                    </Ellipse.Fill>
+                  </Ellipse>
+                  <TextBlock Text="液位极限报警" FontSize="14" Foreground="White" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="104"/>
+                </StackPanel>
+                <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Vertical" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="2,0">
+                  <Ellipse Width="40" Height="40" Stroke="{StaticResource BrushBorder}" StrokeThickness="2">
+                    <Ellipse.Fill>
+                      <SolidColorBrush Color="{Binding SignalColor_DI16}"/>
+                    </Ellipse.Fill>
+                  </Ellipse>
+                  <TextBlock Text="急停报警" FontSize="14" Foreground="White" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="104"/>
+                </StackPanel>
+                <StackPanel Grid.Row="0" Grid.Column="3" Orientation="Vertical" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="2,0">
+                  <Ellipse Width="40" Height="40" Stroke="{StaticResource BrushBorder}" StrokeThickness="2">
+                    <Ellipse.Fill>
+                      <SolidColorBrush Color="{Binding SignalColor_DI01}"/>
+                    </Ellipse.Fill>
+                  </Ellipse>
+                  <TextBlock Text="恢复默认参数" FontSize="14" Foreground="White" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="104"/>
+                </StackPanel>
+              </Grid>
+            </Grid>
+          </Border>
+
+          <!-- 工艺 / 摄像头 / 报表：曲线占左列，任务管理占右列 -->
+          <Grid Grid.Row="3" Grid.Column="0" Margin="0,0,6,0" MinHeight="0">
+            <Grid RowDefinitions="*" IsVisible="{Binding IsProcessPanelTabSelected}" x:CompileBindings="False">
+              <Border Background="{StaticResource BrushBgPanel}"
+                      CornerRadius="10"
+                      Padding="10,4,10,12"
+                      BorderBrush="{StaticResource BrushBorder}"
+                      BorderThickness="1"
+                      MinHeight="220"
+                      ClipToBounds="False"
+                      VerticalAlignment="Stretch"
+                      HorizontalAlignment="Stretch">
+                <Grid RowDefinitions="Auto,*">
+                  <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,2">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                      <TextBlock Text="压力曲线" FontSize="14" FontWeight="Medium"
+                                 Foreground="{StaticResource BrushTextPrimary}" VerticalAlignment="Center"/>
+                      <TextBlock Text="{Binding CurveSaveHint}" FontSize="11"
+                                 Foreground="{Binding CurveSaveHintBrush}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <CheckBox Grid.Column="1" Content="绘制曲线" FontSize="12" Foreground="{StaticResource BrushTextSecondary}"
+                              IsChecked="{Binding IsCollectingCurveData}" Margin="0,0,14,0" VerticalAlignment="Center"/>
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="14">
+                      <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Border Width="18" Height="3" CornerRadius="2" Background="{StaticResource BrushPrimary}"/>
+                        <TextBlock Text="压力 (MPa)" FontSize="12" Foreground="{StaticResource BrushTextSecondary}"/>
+                      </StackPanel>
+                      <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Border Width="18" Height="3" CornerRadius="2" Background="{StaticResource BrushInfo}"/>
+                        <TextBlock Text="位移 (mm)" FontSize="12" Foreground="{StaticResource BrushTextSecondary}"/>
+                      </StackPanel>
+                    </StackPanel>
+                  </Grid>
+                  <Border Grid.Row="1" Margin="0"
+                          Background="#FF2D2D30"
+                          CornerRadius="6" MinHeight="160" VerticalAlignment="Stretch"
+                          ClipToBounds="False" Padding="2,6,6,24">
+                    <Border.ContextMenu>
+                      <ContextMenu>
+                        <MenuItem Header="保存曲线（随数据回传）" Click="OnSaveWithstandCurveClick"/>
+                        <MenuItem Header="清除已保存曲线" Click="OnClearSavedWithstandCurveClick"/>
+                      </ContextMenu>
+                    </Border.ContextMenu>
+                    <lvc:CartesianChart
+                        x:Name="WithstandCurveChart"
+                        MinHeight="140"
+                        Series="{Binding WithstandCurveSeries}"
+                        XAxes="{Binding WithstandCurveXAxes}"
+                        YAxes="{Binding WithstandCurveYAxes}"
+                        LegendPosition="{x:Static lc:LegendPosition.Hidden}"
+                        TooltipPosition="{x:Static lc:TooltipPosition.Hidden}"
+                        AnimationsSpeed="0:0:0.001"
+                        ZoomMode="{x:Static lc:ZoomAndPanMode.X}">
+                      <lvc:CartesianChart.ContextMenu>
+                        <ContextMenu>
+                          <MenuItem Header="保存曲线（随数据回传）" Click="OnSaveWithstandCurveClick"/>
+                          <MenuItem Header="清除已保存曲线" Click="OnClearSavedWithstandCurveClick"/>
+                        </ContextMenu>
+                      </lvc:CartesianChart.ContextMenu>
+                      <lvc:CartesianChart.DrawMargin>
+                        <lc:Margin Left="64" Top="12" Right="72" Bottom="88"/>
+                      </lvc:CartesianChart.DrawMargin>
+                    </lvc:CartesianChart>
+                  </Border>
+                </Grid>
+              </Border>
+            </Grid>
+
+            <!-- 摄像头一：预览占位 + 底部按钮 -->
+            <Grid RowDefinitions="*,Auto" Margin="0,4,0,0" IsVisible="{Binding IsCameraOnePanelTabSelected}">
+              <Border Grid.Row="0" Background="#FF2A2F37" CornerRadius="8"
+                      BorderBrush="#FF5B6270" BorderThickness="1" MinHeight="200"
+                      VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <TextBlock Text="摄像头预览（待接入设备）"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Foreground="{StaticResource BrushTextTertiary}" FontSize="14"/>
+              </Border>
+              <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="16"
+                          HorizontalAlignment="Center" Margin="0,12,0,4">
+                <Button MinWidth="180" MinHeight="44" FontSize="14"
+                        Background="#FF3C4149" Foreground="{StaticResource BrushTextPrimary}"
+                        BorderBrush="{StaticResource BrushBorder}" BorderThickness="1" CornerRadius="6"
+                        Content="开启摄像头" Command="{Binding OpenCameraPreviewCommand}"/>
+                <Button MinWidth="180" MinHeight="44" FontSize="14"
+                        Background="#FF3C4149" Foreground="{StaticResource BrushTextPrimary}"
+                        BorderBrush="{StaticResource BrushBorder}" BorderThickness="1" CornerRadius="6"
+                        Content="退出摄像头" Command="{Binding ExitCameraPanelCommand}"/>
+              </StackPanel>
+            </Grid>
+
+            <Border Margin="0,4,0,0" CornerRadius="8" Background="#FF2A2F37"
+                    BorderBrush="#FF5B6270" BorderThickness="1"
+                    IsVisible="{Binding IsReportPanelTabSelected}"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                    Padding="10,10,10,10">
+              <Grid x:CompileBindings="False" ColumnDefinitions="*,Auto" MinHeight="0">
+                <ScrollViewer Grid.Column="0" Margin="0,0,10,0"
+                             Background="#FF1E2228" CornerRadius="6"
+                             BorderBrush="#FF3D4450" BorderThickness="1"
+                             VerticalScrollBarVisibility="Auto"
+                             HorizontalScrollBarVisibility="Auto"
+                             Padding="16">
+                  <StackPanel Spacing="16">
+                    <!-- 基本信息 -->
+                    <Border Background="#FF252830" CornerRadius="8" Padding="12">
+                      <StackPanel>
+                        <TextBlock Text="基本信息" FontSize="14" FontWeight="SemiBold"
+                                   Foreground="{StaticResource BrushTextPrimary}" Margin="0,0,0,10"/>
+                        <Grid ColumnDefinitions="Auto,*,Auto,*,Auto,*" RowDefinitions="Auto,Auto">
+                          <TextBlock Grid.Row="0" Grid.Column="0" Text="车型型号" FontSize="12"
+                                     Foreground="{StaticResource BrushTextTertiary}" Margin="0,6,12,6" VerticalAlignment="Center"/>
+                          <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ReportProductModel}" Width="180" Margin="0,6"
+                                   IsReadOnly="True" Background="#FF1A1D22" BorderBrush="#FF3D4450"/>
+                          
+                          <TextBlock Grid.Row="0" Grid.Column="2" Text="车型车号" FontSize="12"
+                                     Foreground="{StaticResource BrushTextTertiary}" Margin="20,6,12,6" VerticalAlignment="Center"/>
+                          <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding ReportVehicleNumber}" Width="180" Margin="0,6"
+                                   IsReadOnly="True" Background="#FF1A1D22" BorderBrush="#FF3D4450"/>
+                          
+                          <TextBlock Grid.Row="0" Grid.Column="4" Text="试验员" FontSize="12"
+                                     Foreground="{StaticResource BrushTextTertiary}" Margin="20,6,12,6" VerticalAlignment="Center"/>
+                          <TextBox Grid.Row="0" Grid.Column="5" Text="{Binding ReportTesterName}" Width="180" Margin="0,6"
+                                   IsReadOnly="True" Background="#FF1A1D22" BorderBrush="#FF3D4450"/>
+                          
+                          <TextBlock Grid.Row="1" Grid.Column="0" Text="试验时间" FontSize="12"
+                                     Foreground="{StaticResource BrushTextTertiary}" Margin="0,6,12,6" VerticalAlignment="Center"/>
+                          <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ReportTestTime}" Width="180" Margin="0,6"
+                                   IsReadOnly="True" Background="#FF1A1D22" BorderBrush="#FF3D4450"/>
+                          
+                          <TextBlock Grid.Row="1" Grid.Column="2" Text="设备编号" FontSize="12"
+                                     Foreground="{StaticResource BrushTextTertiary}" Margin="20,6,12,6" VerticalAlignment="Center"/>
+                          <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding ReportDeviceNumber}" Width="180" Margin="0,6"
+                                   Background="#FF1A1D22" BorderBrush="#FF3D4450"/>
+                          
+                          <TextBlock Grid.Row="1" Grid.Column="4" Text="备注信息" FontSize="12"
+                                     Foreground="{StaticResource BrushTextTertiary}" Margin="20,6,12,6" VerticalAlignment="Center"/>
+                          <TextBox Grid.Row="1" Grid.Column="5" Text="{Binding ReportRemarks}" Width="180" Margin="0,6"
+                                   Background="#FF1A1D22" BorderBrush="#FF3D4450"/>
+                        </Grid>
+                      </StackPanel>
+                    </Border>
+
+                    <!-- 退卸工艺数据 -->
+                    <Border Background="#FF252830" CornerRadius="8" Padding="12">
+                      <StackPanel>
+                        <TextBlock Text="退卸工艺数据" FontSize="14" FontWeight="SemiBold"
+                                   Foreground="{StaticResource BrushTextPrimary}" Margin="0,0,0,10"/>
+                        <Grid ColumnDefinitions="Auto,*,Auto,*,Auto,*" RowDefinitions="Auto,Auto,Auto">
+                          <TextBlock Grid.Row="0" Grid.Column="0" Text="目标压力(MPa)" FontSize="12"
+                                     Foreground="{StaticResource BrushTextTertiary}" Margin="0,6,12,6" VerticalAlignment="Center"/>
+                          <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ReportTargetPressure}" Width="150" Margin="0,6"
+                                   IsReadOnly="True" Background="#FF1A1D22" BorderBrush="#FF3D4450"/>
+
+                          <TextBlock Grid.Row="0" Grid.Column="2" Text="实际位移(mm)" FontSize="12"
+                                     Foreground="{StaticResource BrushTextTertiary}" Margin="12,6,12,6" VerticalAlignment="Center"/>
+                          <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding ReportActualDisplacement}" Width="150" Margin="0,6"
+                                   IsReadOnly="True" Background="#FF1A1D22" BorderBrush="#FF3D4450"/>
+
+                          <TextBlock Grid.Row="0" Grid.Column="4" Text="位移补充值(mm)" FontSize="12"
+                                     Foreground="{StaticResource BrushTextTertiary}" Margin="12,6,12,6" VerticalAlignment="Center"/>
+                          <TextBox Grid.Row="0" Grid.Column="5" Text="{Binding ReportDisplacementOffset}" Width="150" Margin="0,6"
+                                   IsReadOnly="True" Background="#FF1A1D22" BorderBrush="#FF3D4450"/>
+
+                          <TextBlock Grid.Row="1" Grid.Column="0" Text="开始减速压力(bar)" FontSize="12"
+                                     Foreground="{StaticResource BrushTextTertiary}" Margin="0,6,12,6" VerticalAlignment="Center"/>
+                          <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ReportDecelPressure}" Width="150" Margin="0,6"
+                                   IsReadOnly="True" Background="#FF1A1D22" BorderBrush="#FF3D4450"/>
+
+                          <TextBlock Grid.Row="1" Grid.Column="2" Text="高压浮动限制T" FontSize="12"
+                                     Foreground="{StaticResource BrushTextTertiary}" Margin="12,6,12,6" VerticalAlignment="Center"/>
+                          <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding ReportHighPressureLimit}" Width="150" Margin="0,6"
+                                   IsReadOnly="True" Background="#FF1A1D22" BorderBrush="#FF3D4450"/>
+
+                          <TextBlock Grid.Row="1" Grid.Column="4" Text="反向时间(S)" FontSize="12"
+                                     Foreground="{StaticResource BrushTextTertiary}" Margin="12,6,12,6" VerticalAlignment="Center"/>
+                          <TextBox Grid.Row="1" Grid.Column="5" Text="{Binding ReportReverseTime}" Width="150" Margin="0,6"
+                                   IsReadOnly="True" Background="#FF1A1D22" BorderBrush="#FF3D4450"/>
+
+                          <TextBlock Grid.Row="2" Grid.Column="0" Text="测试结果" FontSize="12"
+                                     Foreground="{StaticResource BrushTextTertiary}" Margin="0,6,12,6" VerticalAlignment="Center"/>
+                          <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding ReportTestResult}" Width="150" Margin="0,6"
+                                   IsReadOnly="True" Background="#FF1A1D22" BorderBrush="#FF3D4450"/>
+                        </Grid>
+                      </StackPanel>
+                    </Border>
+                  </StackPanel>
+                </ScrollViewer>
+
+                <!-- 右侧操作栏 -->
+                <Border Grid.Column="1" MinWidth="156"
+                        Background="#FF252830" CornerRadius="6"
+                        BorderBrush="#FF3D4450" BorderThickness="1"
+                        Padding="12,14"
+                        ClipToBounds="False">
+                  <Grid RowDefinitions="Auto,*,Auto">
+                    <StackPanel Grid.Row="0" Spacing="10" HorizontalAlignment="Stretch" IsVisible="False">
+                      <Button MinHeight="36" FontSize="13" HorizontalAlignment="Stretch"
+                              HorizontalContentAlignment="Center" CornerRadius="6" Cursor="Hand"
+                              Background="#FF3C4149" Foreground="{StaticResource BrushTextPrimary}"
+                              BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+                              Content="上翻" Command="{Binding ReportSidebarFlipUpCommand}"/>
+                      <Grid ColumnDefinitions="Auto,*,Auto" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                        <Button Grid.Column="0" Width="30" Height="30" Padding="0"
+                                HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                CornerRadius="15" Cursor="Hand"
+                                Background="#FF3C4149" Foreground="{StaticResource BrushTextPrimary}"
+                                BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+                                Content="▲" FontSize="11"
+                                Command="{Binding ReportSidebarSpinnerUpCommand}"/>
+                        <Border Grid.Column="1" Margin="6,0" MinHeight="34"
+                                Background="#FF1A1D22" CornerRadius="4"
+                                BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+                                VerticalAlignment="Center">
+                          <TextBlock Text="{Binding ReportSidebarPageNumber}"
+                                     HorizontalAlignment="Center" VerticalAlignment="Center"
+                                     FontSize="22" FontWeight="SemiBold" Foreground="White"
+                                     FontFamily="{StaticResource MonoFont}"/>
+                        </Border>
+                        <Button Grid.Column="2" Width="30" Height="30" Padding="0"
+                                HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                CornerRadius="15" Cursor="Hand"
+                                Background="#FF3C4149" Foreground="{StaticResource BrushTextPrimary}"
+                                BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+                                Content="▼" FontSize="11"
+                                Command="{Binding ReportSidebarSpinnerDownCommand}"/>
+                      </Grid>
+                      <Button MinHeight="36" FontSize="13" HorizontalAlignment="Stretch"
+                              HorizontalContentAlignment="Center" CornerRadius="6" Cursor="Hand"
+                              Background="#FF3C4149" Foreground="{StaticResource BrushTextPrimary}"
+                              BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+                              Content="下翻" Command="{Binding ReportSidebarFlipDownCommand}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="2" Spacing="10" HorizontalAlignment="Stretch" ClipToBounds="False">
+                      <Button MinHeight="40" FontSize="13" HorizontalAlignment="Stretch"
+                              HorizontalContentAlignment="Center" CornerRadius="6" Cursor="Hand"
+                              Padding="14,8,16,8" ClipToBounds="False"
+                              Background="#FF3C4149" Foreground="{StaticResource BrushTextPrimary}"
+                              BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+                              Command="{Binding ReportSidebarSaveCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" ClipToBounds="False">
+                          <TextBlock Text="💾" FontSize="15" VerticalAlignment="Center"/>
+                          <TextBlock Text="保存报表" VerticalAlignment="Center" TextWrapping="NoWrap"/>
+                        </StackPanel>
+                      </Button>
+                      <Button MinHeight="40" FontSize="13" HorizontalAlignment="Stretch"
+                              HorizontalContentAlignment="Center" CornerRadius="6" Cursor="Hand"
+                              Padding="14,8,16,8" ClipToBounds="False"
+                              Background="#FF3C4149" Foreground="{StaticResource BrushTextPrimary}"
+                              BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+                              Command="{Binding ReportSidebarPrintCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" ClipToBounds="False">
+                          <TextBlock Text="🖨" FontSize="15" VerticalAlignment="Center"/>
+                          <TextBlock Text="打印报表" VerticalAlignment="Center" TextWrapping="NoWrap"/>
+                        </StackPanel>
+                      </Button>
+                    </StackPanel>
+                  </Grid>
+                </Border>
+              </Grid>
+            </Border>
+          </Grid>
+
+        <!-- 任务管理：下载 / 查看 / 上传 / 故障上报 -->
+        <Border Grid.Row="3" Grid.Column="1" Margin="0,0,0,0" VerticalAlignment="Stretch"
+                Background="{StaticResource BrushBgInput}" CornerRadius="8"
+                BorderBrush="{StaticResource BrushBorder}" BorderThickness="1" ClipToBounds="False"
+                MinHeight="0" IsVisible="{Binding IsProcessPanelTabSelected}">
+          <Grid RowDefinitions="Auto,*">
+            <Border Grid.Row="0" Background="#FF2F343D" Padding="10,8"
+                    BorderBrush="{StaticResource BrushBorder}" BorderThickness="0,0,0,1">
+              <TextBlock Text="任务管理" FontSize="13" FontWeight="Medium"
+                         Foreground="{StaticResource BrushTextPrimary}" HorizontalAlignment="Center"/>
+            </Border>
+            <ScrollViewer Grid.Row="1" Margin="6"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="6"
+                        VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+              <Button Classes="task-mgmt-btn" Margin="0" MinHeight="48" Click="OnTaskDownloadClick" IsVisible="False">
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center">
+                  <TextBlock Text="📥" FontSize="18" VerticalAlignment="Center"/>
+                  <TextBlock Text="任务下载" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </StackPanel>
+              </Button>
+              <Button Classes="task-mgmt-btn" Margin="0" MinHeight="48" Click="OnTaskViewClick" IsVisible="False">
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center">
+                  <TextBlock Text="📋" FontSize="18" VerticalAlignment="Center"/>
+                  <TextBlock Text="任务查看" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </StackPanel>
+              </Button>
+              <Button Classes="task-mgmt-btn" Margin="0" MinHeight="48" Click="OnTaskUploadClick" IsVisible="False">
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center">
+                  <TextBlock Text="📤" FontSize="18" VerticalAlignment="Center"/>
+                  <TextBlock Text="任务上传" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </StackPanel>
+              </Button>
+              <Button Classes="task-mgmt-btn" Margin="0" MinHeight="48" Click="OnMesInterfaceTestClick"
+                      IsVisible="False">
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center">
+                  <TextBlock Text="🔧" FontSize="18" VerticalAlignment="Center"/>
+                  <TextBlock Text="MES联调" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </StackPanel>
+              </Button>
+              <Button Classes="task-mgmt-btn" Margin="0" MinHeight="48" Click="OnMesDeviceFaultClick"
+                      IsVisible="False">
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center">
+                  <TextBlock Text="⚠" FontSize="18" VerticalAlignment="Center"/>
+                  <TextBlock Text="故障上报" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </StackPanel>
+              </Button>
+              <!-- 电气监测：自左侧移至故障上报下方 -->
+              <Expander Margin="0,4,0,0" Header="电气监测"
+                        IsExpanded="False" Background="#FF2A2F37" CornerRadius="8"
+                        BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+                        HorizontalAlignment="Stretch">
+                <Border Padding="8,8">
+                  <Grid ColumnDefinitions="*,*">
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="28"/>
+                      <RowDefinition Height="28"/>
+                      <RowDefinition Height="28"/>
+                      <RowDefinition Height="28"/>
+                      <RowDefinition Height="28"/>
+                      <RowDefinition Height="28"/>
+                      <RowDefinition Height="28"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" FontSize="12" Foreground="{StaticResource BrushTextTertiary}"
+                               Text="{Binding PlcAiMai04, StringFormat=电压Uab：{0:F1}V}"/>
+                    <TextBlock Grid.Row="1" Grid.Column="0" FontSize="12" Foreground="{StaticResource BrushTextTertiary}"
+                               Text="{Binding PlcAiMai05, StringFormat=电压Ubc：{0:F1}V}"/>
+                    <TextBlock Grid.Row="2" Grid.Column="0" FontSize="12" Foreground="{StaticResource BrushTextTertiary}"
+                               Text="{Binding PlcAiMai06, StringFormat=电压Uca：{0:F1}V}"/>
+                    <TextBlock Grid.Row="3" Grid.Column="0" FontSize="12" Foreground="{StaticResource BrushTextTertiary}"
+                               Text="{Binding PlcAiMai10, StringFormat=有功功率：{0:F1}w}"/>
+                    <TextBlock Grid.Row="4" Grid.Column="0" FontSize="12" Foreground="{StaticResource BrushTextTertiary}"
+                               Text="{Binding PlcAiMai12, StringFormat=功率因素：{0:F1}}"/>
+                    <TextBlock Grid.Row="5" Grid.Column="0" FontSize="11" Foreground="{StaticResource BrushTextTertiary}"
+                               Text="{Binding PlcAiMai14, StringFormat=正向有功电能：{0:F1}kWh}"/>
+                    <TextBlock Grid.Row="6" Grid.Column="0" FontSize="11" Foreground="{StaticResource BrushTextTertiary}"
+                               Text="{Binding PlcAiMai15, StringFormat=反向有功电能：{0:F1}kWh}"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" FontSize="12" Foreground="{StaticResource BrushTextTertiary}"
+                               Text="{Binding PlcAiMai07, StringFormat=电流Ia：{0:F1}A}"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" FontSize="12" Foreground="{StaticResource BrushTextTertiary}"
+                               Text="{Binding PlcAiMai08, StringFormat=电流Ib：{0:F1}A}"/>
+                    <TextBlock Grid.Row="2" Grid.Column="1" FontSize="12" Foreground="{StaticResource BrushTextTertiary}"
+                               Text="{Binding PlcAiMai09, StringFormat=电流Ic：{0:F1}A}"/>
+                    <TextBlock Grid.Row="3" Grid.Column="1" FontSize="12" Foreground="{StaticResource BrushTextTertiary}"
+                               Text="{Binding PlcAiMai11, StringFormat=无功功率：{0:F1}w}"/>
+                    <TextBlock Grid.Row="4" Grid.Column="1" FontSize="12" Foreground="{StaticResource BrushTextTertiary}"
+                               Text="{Binding PlcAiMai13, StringFormat=频率：{0:F1}Hz}"/>
+                  </Grid>
+                </Border>
+              </Expander>
+            </StackPanel>
+            </ScrollViewer>
+          </Grid>
+        </Border>
+      </Grid>
+      </Grid>
+    </Grid>
+    </Grid>
+
+      <Panel Grid.Row="1" Margin="20"
+             IsVisible="{Binding ShowDeviceInspectionContent}">
+        <views:DeviceInspectionView DataContext="{Binding DeviceInspection}"/>
+      </Panel>
+
+      <Panel Grid.Row="1" Margin="20"
+             IsVisible="{Binding ShowHardwareCalibrationContent}">
+        <views:HardwareCalibrationView DataContext="{Binding HardwareCalibration}"/>
+      </Panel>
+
+      <Panel Grid.Row="1" Margin="20"
+             IsVisible="{Binding ShowReportManagementContent}">
+        <views:TestReportManagementView DataContext="{Binding TestReportManagement}"/>
+      </Panel>
+
+      <Panel Grid.Row="1" Margin="20"
+             IsVisible="{Binding ShowUserManagementContent}">
+        <views:UserManagementView DataContext="{Binding UserManagement}"/>
+      </Panel>
+
+      <Panel Grid.Row="1" Margin="20"
+             IsVisible="{Binding ShowSystemLogContent}">
+        <views:SystemLogView DataContext="{Binding SystemLog}"/>
+      </Panel>
+
+      <Panel Grid.Row="1" Margin="20"
+             IsVisible="{Binding ShowFaultDiagnosisContent}">
+        <views:FaultDiagnosisView DataContext="{Binding FaultDiagnosis}"/>
+      </Panel>
+    </Grid>
+
+    <!-- ============ 状态栏 ============ -->
+    <Border Grid.Row="2" Grid.ColumnSpan="2"
+            Background="{StaticResource BrushBgTitlebar}"
+            BorderBrush="{StaticResource BrushBorder}"
+            BorderThickness="0,1,0,0">
+      <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" Margin="12,0">
+        <TextBlock Grid.Column="0" FontSize="11" VerticalAlignment="Center"
+                   Foreground="{StaticResource BrushTextPrimary}">
+          <Run Text="当前登录工号: "/><Run Text="{Binding UserId}" FontFamily="{StaticResource MonoFont}"/>
+        </TextBlock>
+        <Border Grid.Column="1" Background="#266EBE28" CornerRadius="4" Padding="10,4" VerticalAlignment="Center">
+          <TextBlock Text="{Binding StatusPlcText}" FontSize="11" Foreground="{StaticResource BrushSuccess}"/>
+        </Border>
+        <Border Grid.Column="2" Background="#33FFC107" CornerRadius="4" Padding="10,4" VerticalAlignment="Center"
+                IsVisible="{Binding ShowSimulationStatus}">
+          <TextBlock Text="仿真模式" FontSize="11" Foreground="{StaticResource BrushSuccess}"/>
+        </Border>
+        <Border Grid.Column="3" Background="#33E14B4A" CornerRadius="4" Padding="10,4" VerticalAlignment="Center"
+                IsVisible="{Binding ShowNetworkErrorStatus}">
+          <TextBlock Text="网络连接错误" FontSize="11" Foreground="{StaticResource BrushDanger}"/>
+        </Border>
+        <TextBlock Grid.Column="4" FontSize="10" VerticalAlignment="Center" HorizontalAlignment="Right"
+                   Foreground="{StaticResource BrushSuccess}"
+                   Text="UoS V20 · .NET 8 · Avalonia 11"/>
+      </Grid>
+    </Border>
+
+    <!-- 任务区 / 模拟量数值编辑 模态窗期间遮住主窗客户区 -->
+    <Border Grid.RowSpan="3" Grid.ColumnSpan="2"
+            ZIndex="5000"
+            IsVisible="{Binding IsAnyMainDimOverlay}"
+            Background="#B3000000"
+            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+            IsHitTestVisible="True"/>
+
+    <!-- 安全报警红色闪烁遮罩 -->
+    <Border Grid.RowSpan="3" Grid.ColumnSpan="2"
+            ZIndex="9999"
+            IsVisible="{Binding IsSafetyAlarmFlashing}"
+            Background="#33FF0000"
+            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+            IsHitTestVisible="False"
+            PointerPressed="OnSafetyAlarmOverlayClicked">
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="4">
+        <TextBlock Text="⚠ 安全报警" FontSize="28" FontWeight="Bold"
+                   Foreground="White" HorizontalAlignment="Center"/>
+        <TextBlock Text="{Binding SafetyAlarmMessage}" FontSize="18"
+                   Foreground="#FFFF5555" HorizontalAlignment="Center"/>
+        <TextBlock Text="（点击此处关闭提示）" FontSize="12"
+                   Foreground="#FFAAAAAA" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+      </StackPanel>
+    </Border>
+  </Grid>
+
+</Window>

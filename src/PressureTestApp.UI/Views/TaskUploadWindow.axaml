@@ -1,0 +1,192 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:PressureTestApp.UI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
+        x:Class="PressureTestApp.UI.Views.TaskUploadWindow"
+        x:DataType="vm:TaskUploadViewModel"
+        Width="1000" Height="700"
+        MinWidth="800" MinHeight="500"
+        WindowStartupLocation="CenterOwner"
+        SystemDecorations="None"
+        Background="Transparent"
+        Title="任务上传">
+
+  <Border CornerRadius="10"
+          Background="{StaticResource BrushBgWindow}"
+          BoxShadow="0 16 48 0 #80000000"
+          ClipToBounds="True">
+
+    <Grid RowDefinitions="44,Auto,*,Auto,Auto">
+
+      <!-- 标题栏 -->
+      <Border Grid.Row="0"
+              Background="{StaticResource BrushBgTitlebar}"
+              BorderBrush="{StaticResource BrushBorder}"
+              BorderThickness="0,0,0,1"
+              PointerPressed="OnTitleBarPointerPressed">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10"
+                      VerticalAlignment="Center" Margin="16,0">
+            <TextBlock Text="📤" FontSize="16"/>
+            <TextBlock Text="任务上传" FontSize="14" FontWeight="Medium"
+                       Foreground="{StaticResource BrushTextPrimary}"
+                       VerticalAlignment="Center"/>
+            <TextBlock Text="·" Foreground="{StaticResource BrushTextDisabled}"/>
+            <TextBlock Text="把已完成的耐压结果回传到 EPE 系统"
+                       FontSize="12"
+                       Foreground="{StaticResource BrushTextTertiary}"
+                       VerticalAlignment="Center"/>
+          </StackPanel>
+
+          <Button Grid.Column="2" Width="30" Height="30" Padding="0"
+                  Background="Transparent" BorderThickness="0"
+                  Foreground="{StaticResource BrushTextSecondary}"
+                  Content="✕" Click="OnCloseClick"
+                  Margin="0,0,8,0"/>
+        </Grid>
+      </Border>
+
+      <!-- 工具栏 -->
+      <Border Grid.Row="1" Padding="20,16">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <Button Grid.Column="0" Classes="primary"
+                  Content="🔄  刷新待上传列表"
+                  Command="{Binding RefreshCommand}"/>
+
+          <Border Grid.Column="1" Background="{StaticResource BrushBgPanel}" CornerRadius="6"
+                  Padding="14,8" Margin="14,0,0,0" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <Ellipse Width="6" Height="6" VerticalAlignment="Center"
+                       Fill="{StaticResource BrushInfo}"/>
+              <TextBlock Text="{Binding StatusMessage}" FontSize="12"
+                         Foreground="{StaticResource BrushTextSecondary}"/>
+            </StackPanel>
+          </Border>
+        </Grid>
+      </Border>
+
+      <!-- 列表 -->
+      <Border Grid.Row="2" Background="{StaticResource BrushBgPanel}"
+              Margin="20,0,20,14" CornerRadius="10" ClipToBounds="True">
+        <Grid RowDefinitions="Auto,*">
+          <Border Grid.Row="0" Background="{StaticResource BrushBgWindow}"
+                  BorderBrush="{StaticResource BrushBorder}" BorderThickness="0,0,0,1">
+            <Grid ColumnDefinitions="48,160,100,100,100,100,160,Auto" Height="40">
+              <CheckBox Grid.Column="0" IsChecked="{Binding IsAllSelected}"
+                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              <TextBlock Grid.Column="1" Text="任务编号" FontSize="12"
+                         Foreground="{StaticResource BrushTextSecondary}"
+                         VerticalAlignment="Center" Margin="8,0"/>
+              <TextBlock Grid.Column="2" Text="子任务ID" FontSize="12"
+                         Foreground="{StaticResource BrushTextSecondary}"
+                         VerticalAlignment="Center" Margin="8,0"/>
+              <TextBlock Grid.Column="3" Text="车型" FontSize="12"
+                         Foreground="{StaticResource BrushTextSecondary}"
+                         VerticalAlignment="Center" Margin="8,0"/>
+              <TextBlock Grid.Column="4" Text="车列号" FontSize="12"
+                         Foreground="{StaticResource BrushTextSecondary}"
+                         VerticalAlignment="Center" Margin="8,0"/>
+              <TextBlock Grid.Column="5" Text="辆号" FontSize="12"
+                         Foreground="{StaticResource BrushTextSecondary}"
+                         VerticalAlignment="Center" Margin="8,0"/>
+              <TextBlock Grid.Column="6" Text="完成时间" FontSize="12"
+                         Foreground="{StaticResource BrushTextSecondary}"
+                         VerticalAlignment="Center" Margin="8,0"/>
+              <TextBlock Grid.Column="7" Text="状态" FontSize="12"
+                         Foreground="{StaticResource BrushTextSecondary}"
+                         VerticalAlignment="Center" Margin="8,0,16,0"/>
+            </Grid>
+          </Border>
+
+          <ScrollViewer Grid.Row="1">
+            <ItemsControl ItemsSource="{Binding Tasks}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:UploadableTaskRow">
+                  <Border BorderBrush="{StaticResource BrushBorder}"
+                          BorderThickness="0,0,0,1">
+                    <Grid ColumnDefinitions="48,160,100,100,100,100,160,Auto" Height="44">
+                      <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected}"
+                                IsEnabled="{Binding !IsUploaded}"
+                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                      <TextBlock Grid.Column="1" Text="{Binding HoldTaskId}"
+                                 FontSize="12" FontFamily="{StaticResource MonoFont}"
+                                 Foreground="{StaticResource BrushTextPrimary}"
+                                 VerticalAlignment="Center" Margin="8,0"/>
+                      <TextBlock Grid.Column="2" Text="{Binding HoldItemId}"
+                                 FontSize="12" FontFamily="{StaticResource MonoFont}"
+                                 Foreground="{StaticResource BrushTextSecondary}"
+                                 VerticalAlignment="Center" Margin="8,0"/>
+                      <TextBlock Grid.Column="3" Text="{Binding ProjectNumber}"
+                                 FontSize="12"
+                                 Foreground="{StaticResource BrushTextPrimary}"
+                                 VerticalAlignment="Center" Margin="8,0"/>
+                      <TextBlock Grid.Column="4" Text="{Binding TrainCode}"
+                                 FontSize="12" FontFamily="{StaticResource MonoFont}"
+                                 Foreground="{StaticResource BrushTextPrimary}"
+                                 VerticalAlignment="Center" Margin="8,0"/>
+                      <TextBlock Grid.Column="5" Text="{Binding CarCode}"
+                                 FontSize="12" FontFamily="{StaticResource MonoFont}"
+                                 Foreground="{StaticResource BrushTextPrimary}"
+                                 VerticalAlignment="Center" Margin="8,0"/>
+                      <TextBlock Grid.Column="6" Text="{Binding CompletedAtText}"
+                                 FontSize="12"
+                                 Foreground="{StaticResource BrushTextTertiary}"
+                                 VerticalAlignment="Center" Margin="8,0"/>
+                      <TextBlock Grid.Column="7" Text="{Binding StatusText}"
+                                 FontSize="12"
+                                 Foreground="{StaticResource BrushSuccess}"
+                                 VerticalAlignment="Center" Margin="8,0,16,0"/>
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </Grid>
+      </Border>
+
+      <!-- 进度条 -->
+      <Border Grid.Row="3"
+              IsVisible="{Binding IsUploading}"
+              Margin="20,0,20,14"
+              Background="{StaticResource BrushBgPanel}"
+              CornerRadius="6" Padding="14,10">
+        <StackPanel Spacing="6">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Grid.Column="0" FontSize="12"
+                       Foreground="{StaticResource BrushTextSecondary}">
+              <Run Text="正在上传："/>
+              <Run Text="{Binding CurrentUploadingId}" FontFamily="{StaticResource MonoFont}"/>
+            </TextBlock>
+            <TextBlock Grid.Column="1" FontSize="12"
+                       Foreground="{StaticResource BrushPrimary}"
+                       FontFamily="{StaticResource MonoFont}"
+                       Text="{Binding UploadProgress, StringFormat={}{0:F0}%}"/>
+          </Grid>
+          <ProgressBar Value="{Binding UploadProgress}" Maximum="100" Height="4"
+                       Foreground="{StaticResource BrushPrimary}"
+                       Background="{StaticResource BrushBgWindow}"/>
+        </StackPanel>
+      </Border>
+
+      <!-- 底部 -->
+      <Border Grid.Row="4" Background="{StaticResource BrushBgTitlebar}"
+              BorderBrush="{StaticResource BrushBorder}" BorderThickness="0,1,0,0"
+              Padding="20,14">
+        <Grid ColumnDefinitions="*,Auto,Auto">
+          <TextBlock Grid.Column="0" FontSize="13"
+                     Foreground="{StaticResource BrushTextSecondary}"
+                     VerticalAlignment="Center"
+                     Text="{Binding SelectedSummary}"/>
+          <Button Grid.Column="1" Content="关闭" Margin="0,0,10,0"
+                  Click="OnCloseClick"/>
+          <Button Grid.Column="2" Classes="primary" Content="📤  上传选中任务"
+                  Command="{Binding UploadSelectedCommand}"
+                  IsEnabled="{Binding !IsUploading}"/>
+        </Grid>
+      </Border>
+    </Grid>
+  </Border>
+</Window>

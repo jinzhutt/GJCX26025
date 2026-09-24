@@ -1,0 +1,92 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <RootNamespace>PressureTestApp.UI</RootNamespace>
+    <AssemblyName>PressureTestApp</AssemblyName>
+    <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
+    <UseAppHost>true</UseAppHost>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Avalonia 框架 -->
+    <PackageReference Include="Avalonia" Version="11.2.1" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.2.1" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.1" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.1" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.2.1" Condition="'$(Configuration)' == 'Debug'" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.1" />
+
+    <!-- 控件库 -->
+    <PackageReference Include="Semi.Avalonia" Version="11.2.1.6" />
+    <PackageReference Include="Semi.Avalonia.DataGrid" Version="11.2.1.6" />
+    <PackageReference Include="Irihi.Ursa" Version="1.11.0" />
+    <PackageReference Include="Irihi.Ursa.Themes.Semi" Version="1.11.0" />
+
+    <!-- 图表 -->
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.Avalonia" Version="2.0.0-rc5.4" />
+
+    <!-- MVVM -->
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+
+    <!-- DI -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <PackageReference Include="System.IO.Ports" Version="8.0.0" />
+    
+    <!-- Excel 处理 -->
+    <PackageReference Include="DocumentFormat.OpenXml" Version="3.0.2" />
+    
+    <!-- 语音合成 -->
+    <PackageReference Include="System.Speech" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- 仓库根 config 仅作首次模板；运行期一律以 bin\...\config 为准，编译不覆盖已有文件 -->
+    <Content Include="..\..\config\ALL_PLC_XDP.csv">
+      <Link>ALL_PLC_XDP.csv</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="config\appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\scripts\start-linux.sh">
+      <Link>start-linux.sh</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <!-- 配置 ini：仅当输出目录不存在时从仓库模板复制一次，之后只改 bin\...\config -->
+  <Target Name="CopyRuntimeConfigIniIfMissing" AfterTargets="Build">
+    <PropertyGroup>
+      <_CfgSrc>$(MSBuildProjectDirectory)\..\..\config</_CfgSrc>
+      <_CfgDst>$(TargetDir)config</_CfgDst>
+    </PropertyGroup>
+    <ItemGroup>
+      <_CfgIni Include="$(_CfgSrc)\Para.ini" />
+      <_CfgIni Include="$(_CfgSrc)\rw.ini" />
+      <_CfgIni Include="$(_CfgSrc)\database.ini" />
+      <_CfgIni Include="$(_CfgSrc)\AuthenticationConfig.ini" />
+      <_CfgIni Include="$(_CfgSrc)\app.ini" />
+      <_CfgIni Include="$(_CfgSrc)\DeviceInspectConfig.ini" />
+      <_CfgIni Include="$(_CfgSrc)\ProductionSystemConfig.ini" />
+      <_CfgIni Include="$(_CfgSrc)\CommunicationConfig.ini" Condition="Exists('$(_CfgSrc)\CommunicationConfig.ini')" />
+    </ItemGroup>
+    <MakeDir Directories="$(_CfgDst)" Condition="!Exists('$(_CfgDst)')" />
+    <Copy SourceFiles="@(_CfgIni)" DestinationFolder="$(_CfgDst)" SkipUnchangedFiles="true"
+          Condition="Exists('%(Identity)') And !Exists('$(_CfgDst)\%(Filename)%(Extension)')" />
+  </Target>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PressureTestApp.Core\PressureTestApp.Core.csproj" />
+    <ProjectReference Include="..\PressureTestApp.Data\PressureTestApp.Data.csproj" />
+    <ProjectReference Include="..\PressureTestApp.Communication\PressureTestApp.Communication.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,18 @@
+Tag Name,Address,Data Type,Description
+AI.MAI00,V200,float,高压输出检测
+AI.MAI01,V204,float,泄漏电流检测
+AI.MAI02,V208,float,高压放电检测
+AI.MAI03,V866,float,厂房电压检测
+AI.Gain00,V800,float,增益系数0
+AI.Gain01,V804,float,增益系数1
+AI.Gain02,V808,float,增益系数2
+AI.Gain03,V812,float,增益系数3
+AI.Zero00,V850,float,零点校准0
+AI.Zero01,V854,float,零点校准1
+AI.Zero02,V858,float,零点校准2
+AI.Zero03,V862,float,零点校准3
+DI.MDI00,V0.0,boolean,急停信号（0为急停）
+DI.MDI01,V0.1,boolean,接地保护检测（1为接地断开）
+DI.MDI02,V0.2,boolean,手动/电脑控制切换（0为电脑控制）
+DI.MDI03,V0.3,boolean,电铃信号检测（1为动作）
+DI.MDI04,V0.4,boolean,

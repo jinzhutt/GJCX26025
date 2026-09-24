@@ -1,0 +1,83 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:PressureTestApp.UI.ViewModels"
+        x:Class="PressureTestApp.UI.Views.DeviceAuthWindow"
+        x:DataType="vm:DeviceAuthViewModel"
+        Title="MAC???????"
+        Width="720" Height="520"
+        MinWidth="640" MinHeight="480"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        SystemDecorations="None"
+        Background="{StaticResource BrushBgWindow}"
+        Loaded="OnLoaded">
+
+  <Border BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+          CornerRadius="10" ClipToBounds="True"
+          BoxShadow="0 12 40 0 #80000000">
+    <Grid RowDefinitions="44,*,Auto">
+      <Border Grid.Row="0" Background="{StaticResource BrushBgTitlebar}"
+              BorderBrush="{StaticResource BrushBorder}" BorderThickness="0,0,0,1"
+              PointerPressed="OnTitleBarPointerPressed">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock Grid.Column="0" Text="MAC???????" Margin="16,0"
+                     FontSize="15" FontWeight="SemiBold"
+                     Foreground="{StaticResource BrushPrimary}"
+                     VerticalAlignment="Center"/>
+          <Button Grid.Column="1" Content="?" Width="36" Height="36" Padding="0"
+                  Margin="0,0,8,0" Background="Transparent" BorderThickness="0"
+                  Foreground="{StaticResource BrushTextSecondary}"
+                  Command="{Binding CloseCommand}"/>
+        </Grid>
+      </Border>
+
+      <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24,20" Spacing="16">
+          <Border Background="#12FFFFFF" CornerRadius="8" Padding="16"
+                  BorderBrush="{StaticResource BrushBorder}" BorderThickness="1">
+            <StackPanel Spacing="10">
+              <TextBlock Text="???????" FontSize="14" FontWeight="SemiBold"
+                         Foreground="{StaticResource BrushPrimary}"/>
+              <TextBlock TextWrapping="Wrap" LineHeight="22" FontSize="13"
+                         Foreground="{StaticResource BrushTextSecondary}">
+                1????????????????????????????????? EPE ??????????????<LineBreak/>
+                2??????????????????????????????υτ MAC ??????????????? EPE ???????¦·? ID???????????????????
+              </TextBlock>
+            </StackPanel>
+          </Border>
+
+          <TextBlock Text="{Binding CurrentDeviceIdText}" FontSize="13"
+                     Foreground="{StaticResource BrushTextTertiary}"/>
+
+          <StackPanel Spacing="6">
+            <TextBlock Text="MAC???" FontSize="12"
+                       Foreground="{StaticResource BrushTextSecondary}"/>
+            <ComboBox ItemsSource="{Binding MacEntries}"
+                      SelectedItem="{Binding SelectedMac}"
+                      PlaceholderText="--?????--"
+                      HorizontalAlignment="Stretch" MinHeight="40"/>
+          </StackPanel>
+
+          <TextBlock Text="{Binding StatusText}" TextWrapping="Wrap"
+                     FontSize="12" Foreground="{StaticResource BrushTextTertiary}"/>
+
+          <Grid ColumnDefinitions="*,*,*">
+            <Button Grid.Column="0" Content="MAC??????"
+                    Command="{Binding ScanMacCommand}"
+                    IsEnabled="{Binding !IsBusy}"
+                    MinHeight="40"/>
+            <Button Grid.Column="1" Content="MAC???????" Classes="primary"
+                    Command="{Binding RequestAuthCommand}"
+                    IsEnabled="{Binding !IsBusy}"
+                    MinHeight="40"/>
+            <Button Grid.Column="2" Content="?? ??"
+                    Command="{Binding CloseCommand}"
+                    MinHeight="40"/>
+          </Grid>
+        </StackPanel>
+      </ScrollViewer>
+
+      <Border Grid.Row="2" Padding="0,0,0,12"/>
+    </Grid>
+  </Border>
+</Window>

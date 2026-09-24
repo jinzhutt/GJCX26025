@@ -1,0 +1,233 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
+        xmlns:vm="clr-namespace:PressureTestApp.UI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
+        Width="1000" Height="700"
+        Title="试验报告编辑器"
+        x:Class="PressureTestApp.UI.Views.ReportEditorWindow"
+        x:DataType="vm:ReportEditorViewModel">
+  <Window.Styles>
+    <Style Selector="Window">
+      <Setter Property="Background" Value="#FF1A1D23"/>
+    </Style>
+    <Style Selector="TextBlock">
+      <Setter Property="Foreground" Value="#FFFFFFFF"/>
+    </Style>
+    <Style Selector="TextBox">
+      <Setter Property="Background" Value="#FF2C2F36"/>
+      <Setter Property="BorderBrush" Value="#FF4A5058"/>
+      <Setter Property="Foreground" Value="#FFFFFFFF"/>
+      <Setter Property="MinHeight" Value="32"/>
+      <Setter Property="Padding" Value="8"/>
+    </Style>
+    <Style Selector="ComboBox">
+      <Setter Property="Background" Value="#FF2C2F36"/>
+      <Setter Property="BorderBrush" Value="#FF4A5058"/>
+      <Setter Property="Foreground" Value="#FFFFFFFF"/>
+      <Setter Property="MinHeight" Value="32"/>
+      <Setter Property="Padding" Value="8"/>
+    </Style>
+    <Style Selector="Button">
+      <Setter Property="Background" Value="#FF0078D7"/>
+      <Setter Property="Foreground" Value="#FFFFFFFF"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="MinHeight" Value="32"/>
+      <Setter Property="Padding" Value="12,6"/>
+    </Style>
+    <Style Selector="Button:hover">
+      <Setter Property="Background" Value="#FF106EBE"/>
+    </Style>
+    <Style Selector="dg|DataGrid">
+      <Setter Property="Background" Value="#FF2C2F36"/>
+      <Setter Property="BorderBrush" Value="#FF4A5058"/>
+      <Setter Property="Foreground" Value="#FFFFFFFF"/>
+    </Style>
+    <Style Selector="dg|DataGridColumnHeader">
+      <Setter Property="Background" Value="#FF3E424B"/>
+      <Setter Property="Foreground" Value="#FFFFFFFF"/>
+      <Setter Property="Padding" Value="8"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+    <Style Selector="dg|DataGridRow">
+      <Setter Property="Background" Value="#FF2C2F36"/>
+    </Style>
+    <Style Selector="dg|DataGridRow:pointerover">
+      <Setter Property="Background" Value="#FF3E424B"/>
+    </Style>
+    <Style Selector="dg|DataGridRow:selected">
+      <Setter Property="Background" Value="#FF0078D7"/>
+    </Style>
+  </Window.Styles>
+
+  <Grid RowDefinitions="Auto,*,Auto">
+    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Background="#FF2C2F36">
+      <TextBlock Text="试验报告编辑器" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" Margin="16"/>
+      <Button Grid.Column="1" Content="关闭" Command="{Binding CloseCommand}" Margin="16" Width="80"/>
+    </Grid>
+
+    <Panel Grid.Row="1" Margin="16">
+      <StackPanel Spacing="16">
+        <Border Background="#FF2C2F36" CornerRadius="8">
+          <Panel Margin="16">
+            <TextBlock Text="基本信息" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,12"/>
+            <Grid ColumnDefinitions="120,180,120,180,120,180">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+              </Grid.RowDefinitions>
+              
+              <TextBlock Grid.Row="0" Grid.Column="0" Text="车型型号" VerticalAlignment="Center" Margin="0,8,0,8"/>
+              <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ProductModel}" Width="180" Margin="0,8,0,8"/>
+              
+              <TextBlock Grid.Row="0" Grid.Column="2" Text="车型车号" VerticalAlignment="Center" Margin="0,8,0,8"/>
+              <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding VehicleNumber}" Width="180" Margin="0,8,0,8"/>
+              
+              <TextBlock Grid.Row="0" Grid.Column="4" Text="试验员" VerticalAlignment="Center" Margin="0,8,0,8"/>
+              <TextBox Grid.Row="0" Grid.Column="5" Text="{Binding TesterName}" Width="180" Margin="0,8,0,8"/>
+              
+              <TextBlock Grid.Row="1" Grid.Column="0" Text="试验时间" VerticalAlignment="Center" Margin="0,8,0,8"/>
+              <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding TestTime}" Width="180" Margin="0,8,0,8" Watermark="yyyy-MM-dd HH:mm:ss"/>
+              
+              <TextBlock Grid.Row="1" Grid.Column="2" Text="设备编号" VerticalAlignment="Center" Margin="0,8,0,8"/>
+              <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding DeviceNumber}" Width="180" Margin="0,8,0,8"/>
+              
+              <TextBlock Grid.Row="1" Grid.Column="4" Text="备注信息" VerticalAlignment="Center" Margin="0,8,0,8"/>
+              <TextBox Grid.Row="1" Grid.Column="5" Text="{Binding Remarks}" Width="180" Margin="0,8,0,8"/>
+            </Grid>
+          </Panel>
+        </Border>
+
+        <Border Background="#FF2C2F36" CornerRadius="8">
+          <Panel Margin="16">
+            <TextBlock Text="回路测试数据" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,12"/>
+            <Grid ColumnDefinitions="100,140,100,140,100,140">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+              </Grid.RowDefinitions>
+              
+              <TextBlock Grid.Row="0" Grid.Column="0" Text="回路一试验电压(KV)" VerticalAlignment="Center" Margin="0,8,0,8"/>
+              <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding LoopOneWithstandVoltage}" Width="140" Margin="0,8,0,8"/>
+              <TextBlock Grid.Row="0" Grid.Column="2" Text="回路一泄漏电流(mA)" VerticalAlignment="Center" Margin="0,8,0,8"/>
+              <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding LoopOneLeakageCurrent}" Width="140" Margin="0,8,0,8"/>
+              <TextBlock Grid.Row="0" Grid.Column="4" Text="回路一测试结果" VerticalAlignment="Center" Margin="0,8,0,8"/>
+              <ComboBox Grid.Row="0" Grid.Column="5" Width="140" Margin="0,8,0,8" SelectedItem="{Binding LoopOneTestResult}">
+                <ComboBox.Items>
+                  <x:String>合格</x:String>
+                  <x:String>不合格</x:String>
+                </ComboBox.Items>
+              </ComboBox>
+              
+              <TextBlock Grid.Row="1" Grid.Column="0" Text="回路二试验电压(KV)" VerticalAlignment="Center" Margin="0,8,0,8"/>
+              <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding LoopTwoWithstandVoltage}" Width="140" Margin="0,8,0,8"/>
+              <TextBlock Grid.Row="1" Grid.Column="2" Text="回路二泄漏电流(mA)" VerticalAlignment="Center" Margin="0,8,0,8"/>
+              <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding LoopTwoLeakageCurrent}" Width="140" Margin="0,8,0,8"/>
+              <TextBlock Grid.Row="1" Grid.Column="4" Text="回路二测试结果" VerticalAlignment="Center" Margin="0,8,0,8"/>
+              <ComboBox Grid.Row="1" Grid.Column="5" Width="140" Margin="0,8,0,8" SelectedItem="{Binding LoopTwoTestResult}">
+                <ComboBox.Items>
+                  <x:String>合格</x:String>
+                  <x:String>不合格</x:String>
+                </ComboBox.Items>
+              </ComboBox>
+              
+              <TextBlock Grid.Row="2" Grid.Column="0" Text="回路三试验电压(KV)" VerticalAlignment="Center" Margin="0,8,0,8"/>
+              <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding LoopThreeWithstandVoltage}" Width="140" Margin="0,8,0,8"/>
+              <TextBlock Grid.Row="2" Grid.Column="2" Text="回路三泄漏电流(mA)" VerticalAlignment="Center" Margin="0,8,0,8"/>
+              <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding LoopThreeLeakageCurrent}" Width="140" Margin="0,8,0,8"/>
+              <TextBlock Grid.Row="2" Grid.Column="4" Text="回路三测试结果" VerticalAlignment="Center" Margin="0,8,0,8"/>
+              <ComboBox Grid.Row="2" Grid.Column="5" Width="140" Margin="0,8,0,8" SelectedItem="{Binding LoopThreeTestResult}">
+                <ComboBox.Items>
+                  <x:String>合格</x:String>
+                  <x:String>不合格</x:String>
+                </ComboBox.Items>
+              </ComboBox>
+              
+              <TextBlock Grid.Row="3" Grid.Column="0" Text="回路四试验电压(KV)" VerticalAlignment="Center" Margin="0,8,0,8"/>
+              <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding LoopFourWithstandVoltage}" Width="140" Margin="0,8,0,8"/>
+              <TextBlock Grid.Row="3" Grid.Column="2" Text="回路四泄漏电流(mA)" VerticalAlignment="Center" Margin="0,8,0,8"/>
+              <TextBox Grid.Row="3" Grid.Column="3" Text="{Binding LoopFourLeakageCurrent}" Width="140" Margin="0,8,0,8"/>
+              <TextBlock Grid.Row="3" Grid.Column="4" Text="回路四测试结果" VerticalAlignment="Center" Margin="0,8,0,8"/>
+              <ComboBox Grid.Row="3" Grid.Column="5" Width="140" Margin="0,8,0,8" SelectedItem="{Binding LoopFourTestResult}">
+                <ComboBox.Items>
+                  <x:String>合格</x:String>
+                  <x:String>不合格</x:String>
+                </ComboBox.Items>
+              </ComboBox>
+              
+              <TextBlock Grid.Row="4" Grid.Column="0" Text="绝缘电阻" VerticalAlignment="Center" Margin="0,8,0,8"/>
+              <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding InsulationResistance}" Width="140" Margin="0,8,0,8"/>
+              <TextBlock Grid.Row="4" Grid.Column="2" Text="匝间耐压" VerticalAlignment="Center" Margin="0,8,0,8"/>
+              <TextBox Grid.Row="4" Grid.Column="3" Text="{Binding TurnWithstand}" Width="140" Margin="0,8,0,8"/>
+            </Grid>
+          </Panel>
+        </Border>
+
+        <Border Background="#FF2C2F36" CornerRadius="8">
+          <Panel Margin="16">
+            <TextBlock Text="测试结果" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,12"/>
+            <Grid ColumnDefinitions="120,180,120,180,120,180">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+              </Grid.RowDefinitions>
+              
+              <TextBlock Grid.Row="0" Grid.Column="2" Text="测试结果" VerticalAlignment="Center" Margin="0,8,0,8"/>
+              <ComboBox Grid.Row="0" Grid.Column="3" Width="180" Margin="0,8,0,8"
+                        SelectedItem="{Binding TestResult}">
+                <ComboBox.Items>
+                  <x:String>合格</x:String>
+                  <x:String>不合格</x:String>
+                </ComboBox.Items>
+              </ComboBox>
+              
+              <Button Grid.Row="0" Grid.Column="4" Grid.ColumnSpan="2" Content="添加数据" Command="{Binding AddRowCommand}" Width="120" Margin="0,8,0,8"/>
+            </Grid>
+          </Panel>
+        </Border>
+
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock Text="报告数据列表" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"/>
+          <Button Content="刷新" Command="{Binding RefreshCommand}" Width="80"/>
+        </Grid>
+
+        <dg:DataGrid ItemsSource="{Binding ReportRows}" AutoGenerateColumns="False" IsReadOnly="False" Height="200"
+                     HeadersVisibility="Column" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                     GridLinesVisibility="Horizontal">
+          <dg:DataGrid.Columns>
+            <DataGridTextColumn Header="车型型号" Binding="{Binding ProductModel}" Width="100"/>
+            <DataGridTextColumn Header="车型车号" Binding="{Binding VehicleNumber}" Width="100"/>
+            <DataGridTextColumn Header="试验员" Binding="{Binding TesterName}" Width="100"/>
+            <DataGridTextColumn Header="试验时间" Binding="{Binding TestTime}" Width="160"/>
+            <DataGridTextColumn Header="设备编号" Binding="{Binding DeviceNumber}" Width="100"/>
+            <DataGridTextColumn Header="备注信息" Binding="{Binding Remarks}" Width="100"/>
+            <DataGridTextColumn Header="回路一电压(KV)" Binding="{Binding LoopOneWithstandVoltage}" Width="110"/>
+            <DataGridTextColumn Header="回路一电流(mA)" Binding="{Binding LoopOneLeakageCurrent}" Width="110"/>
+            <DataGridTextColumn Header="回路一结果" Binding="{Binding LoopOneTestResult}" Width="100"/>
+            <DataGridTextColumn Header="回路二电压(KV)" Binding="{Binding LoopTwoWithstandVoltage}" Width="110"/>
+            <DataGridTextColumn Header="回路二电流(mA)" Binding="{Binding LoopTwoLeakageCurrent}" Width="110"/>
+            <DataGridTextColumn Header="回路二结果" Binding="{Binding LoopTwoTestResult}" Width="100"/>
+            <DataGridTextColumn Header="回路三电压(KV)" Binding="{Binding LoopThreeWithstandVoltage}" Width="110"/>
+            <DataGridTextColumn Header="回路三电流(mA)" Binding="{Binding LoopThreeLeakageCurrent}" Width="110"/>
+            <DataGridTextColumn Header="回路三结果" Binding="{Binding LoopThreeTestResult}" Width="100"/>
+            <DataGridTextColumn Header="回路四电压(KV)" Binding="{Binding LoopFourWithstandVoltage}" Width="110"/>
+            <DataGridTextColumn Header="回路四电流(mA)" Binding="{Binding LoopFourLeakageCurrent}" Width="110"/>
+            <DataGridTextColumn Header="回路四结果" Binding="{Binding LoopFourTestResult}" Width="100"/>
+            <DataGridTextColumn Header="绝缘电阻" Binding="{Binding InsulationResistance}" Width="100"/>
+            <DataGridTextColumn Header="匝间耐压" Binding="{Binding TurnWithstand}" Width="100"/>
+            <DataGridTextColumn Header="测试结果" Binding="{Binding TestResult}" Width="100"/>
+          </dg:DataGrid.Columns>
+        </dg:DataGrid>
+      </StackPanel>
+    </Panel>
+
+    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="16,8,16,16" Spacing="15">
+      <Button Content="保存所有修改" Command="{Binding SaveAllCommand}" MinWidth="160" Padding="10,5"/>
+      <Button Content="导出报告" Command="{Binding ExportReportCommand}" MinWidth="140" Padding="10,5"/>
+    </StackPanel>
+  </Grid>
+</Window>

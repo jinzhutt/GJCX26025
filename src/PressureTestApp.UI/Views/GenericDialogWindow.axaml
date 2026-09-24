@@ -1,0 +1,32 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
+        x:Class="PressureTestApp.UI.Views.GenericDialogWindow"
+        Title="系统提示" Width="400" Height="300"
+        CanResize="False">
+
+  <Window.Styles>
+    <Style Selector="Button.h1">
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="Margin" Value="15"/>
+      <Setter Property="Width" Value="80"/>
+      <Setter Property="Height" Value="35"/>
+      <Setter Property="FontSize" Value="20"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+  </Window.Styles>
+
+  <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+    <StackPanel Margin="60">
+      <TextBlock Name="MessageText" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10" FontSize="20"/>
+    </StackPanel>
+    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+      <Button Classes="h1" Content="确 定" Name="OkButton" Click="OnOkClicked"/>
+      <Button Classes="h1" Content="取 消" Name="CancelButton" Click="OnCancelClicked"/>
+    </StackPanel>
+  </StackPanel>
+
+</Window>

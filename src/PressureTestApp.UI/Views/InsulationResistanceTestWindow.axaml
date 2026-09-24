@@ -1,0 +1,160 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:PressureTestApp.UI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="PressureTestApp.UI.Views.InsulationResistanceTestWindow"
+        x:DataType="vm:InsulationResistanceTestViewModel"
+        Title="绝缘电阻测试仪(TH2683A)"
+        Width="960" Height="850"
+        WindowStartupLocation="CenterScreen"
+        >
+
+    <Window.Styles>
+        <Style Selector="Window">
+            <Setter Property="Background" Value="#2C3038"/>
+        </Style>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="Background" Value="#444952"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="#EAEAEA"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Padding" Value="5"/>
+        </Style>
+        <Style Selector="NumericUpDown">
+            <Setter Property="Background" Value="#EAEAEA"/>
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+    </Window.Styles>
+
+    <StackPanel Margin="20" Spacing="15">
+        <StackPanel Orientation="Horizontal" Spacing="20">
+            <TextBlock Text="测试类型：" VerticalAlignment="Center"/>
+            <ComboBox ItemsSource="{Binding TestTypes}" 
+                      SelectedItem="{Binding SelectedTestType}" 
+                      Width="120" VerticalAlignment="Center" BorderBrush="Gray" BorderThickness="1">
+                <ComboBox.Styles>
+                    <Style Selector="ComboBox > TextBox">
+                        <Setter Property="Foreground" Value="Black"/>
+                        <Setter Property="Background" Value="Gray"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                    </Style>
+                    <Style Selector="ComboBoxItem">
+                        <Setter Property="Foreground" Value="Black"/>
+                        <Setter Property="Background" Value="Gray"/>
+                        <Setter Property="Padding" Value="5,2"/>
+                    </Style>
+                    <Style Selector="ComboBoxItem:pointerover">
+                        <Setter Property="Foreground" Value="Black"/>
+                        <Setter Property="Background" Value="Gray"/>
+                    </Style>
+                    <Style Selector="ComboBoxItem:selected">
+                        <Setter Property="Foreground" Value="Black"/>
+                        <Setter Property="Background" Value="#0078D7"/>
+                    </Style>
+                </ComboBox.Styles>
+            </ComboBox>
+
+            <TextBlock Text="串口号:" VerticalAlignment="Center"/>
+            <ComboBox ItemsSource="{Binding ComPorts}" 
+                      SelectedItem="{Binding SelectedComPort}" 
+                      Width="180" VerticalAlignment="Center" BorderBrush="Gray" BorderThickness="1">
+                <ComboBox.Styles>
+                    <Style Selector="ComboBox TextBox">
+                        <Setter Property="Foreground" Value="Black"/>
+                        <Setter Property="Background" Value="Gray"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                    </Style>
+                    <Style Selector="ComboBoxItem">
+                        <Setter Property="Foreground" Value="Black"/>
+                        <Setter Property="Background" Value="Gray"/>
+                        <Setter Property="Padding" Value="5,2"/>
+                    </Style>
+                    <Style Selector="ComboBoxItem:pointerover">
+                        <Setter Property="Foreground" Value="Black"/>
+                        <Setter Property="Background" Value="Gray"/>
+                    </Style>
+                    <Style Selector="ComboBoxItem:selected">
+                        <Setter Property="Foreground" Value="Black"/>
+                        <Setter Property="Background" Value="#0078D7"/>
+                    </Style>
+                </ComboBox.Styles>
+            </ComboBox>
+            <Button Content="连接" Command="{Binding ConnectCommand}" Width="100" IsEnabled="{Binding CanConnect}"/>
+            <Button Content="断开" Command="{Binding DisconnectCommand}" Width="100" IsEnabled="{Binding CanDisconnect}"/>
+            <TextBlock Text="{Binding ConnectionState}" Foreground="{Binding ConnectionStateColor}" FontSize="16" VerticalAlignment="Center"/>
+        </StackPanel>
+
+        <Border Background="#383C46" Padding="20" CornerRadius="6">
+            <StackPanel Spacing="15">
+                <TextBlock Text="{Binding MainTitle}" FontSize="18" FontWeight="Bold"/>
+                <TextBlock Text="{Binding ParamTitle}" FontSize="16" Margin="0,10,0,0"/>
+
+                <StackPanel Orientation="Horizontal" Spacing="20">
+                    <TextBlock Text="{Binding VoltageUnit}" Width="140" VerticalAlignment="Center"/>
+                    <NumericUpDown Value="{Binding Voltage}" Width="120"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Spacing="20">
+                    <TextBlock Text="测试时间(S)" Width="140" VerticalAlignment="Center"/>
+                    <NumericUpDown Value="{Binding TestTime}" Width="120"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Spacing="20">
+                    <TextBlock Text="{Binding LimitLabel}" Width="140" VerticalAlignment="Center"/>
+                    <NumericUpDown Value="{Binding ResistanceLimit}" Width="120"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,20,0,0" Spacing="40">
+                    <Button Content="{Binding StartButtonText}" Command="{Binding StartTestCommand}" Width="260" IsEnabled="{Binding CanStartTest}"/>
+                    <Button Content="{Binding StopButtonText}" Command="{Binding StopTestCommand}" Width="260" IsEnabled="{Binding CanStopTest}"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <Border Background="#383C46" Padding="20" CornerRadius="6">
+            <StackPanel Spacing="15">
+                <TextBlock Text="测试结果" FontSize="18" FontWeight="Bold"/>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20">
+                    <TextBlock Text="倒计时:" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding CountDown}" Foreground="Red" FontSize="20" FontWeight="Bold"/>
+                </StackPanel>
+
+                <Border Background="#2C3038" Padding="10" CornerRadius="4">
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="提示信息" FontSize="14" FontWeight="Bold" Foreground="#00BFFF"/>
+                        <TextBlock Text="1. 测试前请确保设备已正确连接" FontSize="12" Foreground="#AAAAAA"/>
+                        <TextBlock Text="2. 选择正确的测试类型和参数" FontSize="12" Foreground="#AAAAAA"/>
+                        <TextBlock Text="3. 测试过程中请勿断开连接" FontSize="12" Foreground="#AAAAAA"/>
+                        <TextBlock Text="4. 测试结果会自动判断合格/不合格" FontSize="12" Foreground="#AAAAAA"/>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Orientation="Horizontal" Spacing="20">
+                    <TextBlock Text="{Binding StateLabel}" Width="140" VerticalAlignment="Center"/>
+                    <TextBox Text="{Binding TestState}" Width="500" IsReadOnly="True"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Spacing="20">
+                    <TextBlock Text="{Binding ValueLabel}" Width="140" VerticalAlignment="Center"/>
+                    <TextBox Text="{Binding ResistanceValue}" Width="500" IsReadOnly="True"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Spacing="20">
+                    <TextBlock Text="{Binding ResultLabel}" Width="140" VerticalAlignment="Center"/>
+                    <TextBox Text="{Binding TestConclusion}" Width="500" IsReadOnly="True" BorderBrush="{Binding TestConclusionColor}" FontWeight="Bold"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</Window>

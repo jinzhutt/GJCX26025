@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>PressureTestApp.Communication</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 西门子 S7 通信（替代原 OPC） -->
+    <PackageReference Include="CsvHelper" Version="33.1.0" />
+    <PackageReference Include="EPPlus" Version="5.8.10" />
+    <PackageReference Include="NModbus.Serial" Version="3.0.81" />
+    <PackageReference Include="S7netplus" Version="0.20.0" />
+
+    <!-- Modbus 串口仪器（预留两路） -->
+    <PackageReference Include="NModbus" Version="3.0.81" />
+    <PackageReference Include="System.IO.Ports" Version="8.0.0" />
+
+    <!-- HTTP 任务接口 -->
+    <PackageReference Include="RestSharp" Version="112.1.0" />
+
+    <!-- Excel 离线导入 -->
+    <PackageReference Include="NPOI" Version="2.7.1" />
+
+    <!-- PDF 报表导出 -->
+    <PackageReference Include="QuestPDF" Version="2024.10.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PressureTestApp.Core\PressureTestApp.Core.csproj" />
+    <ProjectReference Include="..\PressureTestApp.Data\PressureTestApp.Data.csproj" />
+  </ItemGroup>
+
+</Project>

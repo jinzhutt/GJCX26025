@@ -1,0 +1,49 @@
+## Visual Studio
+.vs/
+.vscode/
+
+## Build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+[Tt]est[Rr]esult*/
+
+## NuGet
+*.nupkg
+*.snupkg
+.nuget/
+**/packages/*
+
+## Rider
+.idea/
+*.sln.iml
+
+## OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+## Sensitive / Local config
+*.local.ini
+*.user
+appsettings.Development.json
+
+## Logs
+logs/
+*.log
+
+## Database files
+*.dbf
+*.dpf
+*.bak
+data/
+
+## DM8 driver binaries (not version controlled, deploy separately)
+DmProvider.dll
+dmdpi.dll
+libdmoci.so
+libdmdpi.so
+
+## Output zips
+publish/

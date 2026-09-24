@@ -1,0 +1,92 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:PressureTestApp.UI.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="440" d:DesignHeight="420"
+        x:Class="PressureTestApp.UI.Views.UserEditWindow"
+        x:DataType="vm:UserEditDialogViewModel"
+        Width="440" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource BrushBgWindow}"
+        SystemDecorations="None"
+        Title="{Binding WindowTitle}"
+        Loaded="OnLoaded">
+
+  <Border BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+          CornerRadius="10" ClipToBounds="True"
+          BoxShadow="0 12 40 0 #80000000">
+    <Grid RowDefinitions="48,*">
+      <Border Grid.Row="0" Background="{StaticResource BrushBgTitlebar}"
+              BorderBrush="{StaticResource BrushBorder}" BorderThickness="0,0,0,1"
+              PointerPressed="OnTitleBarPointerPressed">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock Grid.Column="0" Text="{Binding WindowTitle}" Margin="16,0"
+                     FontSize="16" FontWeight="SemiBold"
+                     Foreground="{StaticResource BrushPrimary}"
+                     VerticalAlignment="Center"/>
+          <Button Grid.Column="1" Content="✕" Width="36" Height="36" Padding="0"
+                  Margin="0,0,8,0"
+                  Background="Transparent" BorderThickness="0"
+                  Foreground="{StaticResource BrushTextSecondary}"
+                  Command="{Binding CancelCommand}"/>
+        </Grid>
+      </Border>
+
+      <StackPanel Grid.Row="1" Margin="24,20,24,20" Spacing="14">
+        <Grid ColumnDefinitions="72,*">
+          <TextBlock Grid.Column="0" Text="用户"
+                     Foreground="{StaticResource BrushTextSecondary}"
+                     VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,12,0"/>
+          <TextBox Grid.Column="1" Text="{Binding NameText}" Watermark="请输入"/>
+        </Grid>
+        <Grid ColumnDefinitions="72,*">
+          <TextBlock Grid.Column="0" Text="工号"
+                     Foreground="{StaticResource BrushTextSecondary}"
+                     VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,12,0"/>
+          <TextBox Grid.Column="1" Text="{Binding JobNumberText}" Watermark="请输入"/>
+        </Grid>
+        <Grid ColumnDefinitions="72,*">
+          <TextBlock Grid.Column="0" Text="班组"
+                     Foreground="{StaticResource BrushTextSecondary}"
+                     VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,12,0"/>
+          <TextBox Grid.Column="1" Text="{Binding TeamText}" Watermark="请输入"/>
+        </Grid>
+        <Grid ColumnDefinitions="72,*">
+          <TextBlock Grid.Column="0" Text="权限"
+                     Foreground="{StaticResource BrushTextSecondary}"
+                     VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,12,0"/>
+          <ComboBox Grid.Column="1" ItemsSource="{Binding RoleOptions}"
+                    SelectedItem="{Binding SelectedRole}">
+            <ComboBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:UserRoleOption">
+                <TextBlock Text="{Binding Label}"/>
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+        </Grid>
+        <Grid ColumnDefinitions="72,*">
+          <TextBlock Grid.Column="0" Text="{Binding PasswordFieldLabel}"
+                     Foreground="{StaticResource BrushTextSecondary}"
+                     VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,12,0"/>
+          <TextBox Grid.Column="1" Text="{Binding PasswordText}"
+                   Watermark="{Binding PasswordWatermark}"
+                   PasswordChar="●" RevealPassword="False"/>
+        </Grid>
+        <Grid ColumnDefinitions="72,*">
+          <TextBlock Grid.Column="0" Text="确认密码"
+                     Foreground="{StaticResource BrushTextSecondary}"
+                     VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,12,0"/>
+          <TextBox Grid.Column="1" Text="{Binding ConfirmPasswordText}"
+                   Watermark="{Binding PasswordWatermark}"
+                   PasswordChar="●" RevealPassword="False"/>
+        </Grid>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="16" Margin="0,8,0,0">
+          <Button MinWidth="120" Content="保存" Command="{Binding SaveCommand}"/>
+          <Button MinWidth="120" Content="取消" Command="{Binding CancelCommand}"/>
+        </StackPanel>
+      </StackPanel>
+    </Grid>
+  </Border>
+</Window>

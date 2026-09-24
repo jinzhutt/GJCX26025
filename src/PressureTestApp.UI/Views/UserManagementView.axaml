@@ -1,0 +1,857 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:PressureTestApp.UI.ViewModels"
+             xmlns:conv="using:PressureTestApp.UI.Converters"
+             xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
+             mc:Ignorable="d" d:DesignWidth="1600" d:DesignHeight="900"
+             x:Class="PressureTestApp.UI.Views.UserManagementView"
+             x:DataType="vm:UserManagementViewModel"
+             Loaded="OnViewLoaded">
+
+  <UserControl.Resources>
+    <conv:BoolBrushConverter x:Key="UmSidebarFg"
+                           TrueBrush="{StaticResource BrushTextPrimary}"
+                           FalseBrush="{StaticResource BrushTextSecondary}"/>
+  </UserControl.Resources>
+
+  <UserControl.Styles>
+    <Style Selector="Button.um-sidebar-nav">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
+      <Setter Property="Padding" Value="12,11"/>
+      <Setter Property="CornerRadius" Value="6"/>
+      <Setter Property="FontSize" Value="13"/>
+    </Style>
+    <Style Selector="DataGridColumnHeader">
+      <Setter Property="Background" Value="{StaticResource BrushPrimary}"/>
+      <Setter Property="Foreground" Value="{StaticResource BrushBgTitlebar}"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Padding" Value="10,8"/>
+      <Setter Property="MinHeight" Value="40"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="DataGridColumnHeader ContentPresenter#PART_ContentPresenter TextBlock">
+      <Setter Property="TextWrapping" Value="Wrap"/>
+      <Setter Property="TextAlignment" Value="Center"/>
+    </Style>
+  </UserControl.Styles>
+
+  <!-- 左：数据设置导航；右：用户列表（或其它项占位） -->
+  <Grid ColumnDefinitions="216,*">
+    <Border Grid.Column="0"
+            Background="#FF25282E"
+            BorderBrush="{StaticResource BrushBorder}"
+            BorderThickness="0,0,1,0"
+            CornerRadius="8,0,0,8"
+            Padding="10,12,10,12">
+      <Grid RowDefinitions="Auto,*">
+        <TextBlock Grid.Row="0" Text="数据设置" FontSize="12" FontWeight="SemiBold"
+                   Foreground="{StaticResource BrushTextTertiary}"
+                   Margin="8,0,8,10"/>
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto">
+          <StackPanel Spacing="2">
+            <!-- 用户管理 -->
+            <Grid Margin="0,0,0,2">
+              <Border CornerRadius="6" Background="#26EF9A4E"
+                      IsVisible="{Binding SidebarSelUsers}"/>
+              <Button Classes="um-sidebar-nav"
+                      Foreground="{Binding SidebarSelUsers, Converter={StaticResource UmSidebarFg}}"
+                      Command="{Binding SelectSidebarSectionCommand}" CommandParameter="users">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                  <TextBlock Text="&#x1F464;" FontSize="15" VerticalAlignment="Center"/>
+                  <TextBlock Text="用户管理" VerticalAlignment="Center"/>
+                </StackPanel>
+              </Button>
+            </Grid>
+            <!-- 型号管理：车型来自数据库，与 Para.ini 参数集解耦 -->
+            <Grid Margin="0,0,0,2">
+              <Border CornerRadius="6" Background="#26EF9A4E"
+                      IsVisible="{Binding SidebarSelModel}"/>
+              <Button Classes="um-sidebar-nav"
+                      Foreground="{Binding SidebarSelModel, Converter={StaticResource UmSidebarFg}}"
+                      Command="{Binding SelectSidebarSectionCommand}" CommandParameter="model">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                  <TextBlock Text="&#x1F5A5;&#xFE0F;" FontSize="15" VerticalAlignment="Center"/>
+                  <TextBlock Text="型号管理" VerticalAlignment="Center"/>
+                </StackPanel>
+              </Button>
+            </Grid>
+            <!-- 参数管理：独立参数名 → Para.ini -->
+
+            <Grid Margin="0,0,0,2">
+              <Border CornerRadius="6" Background="#26EF9A4E"
+                      IsVisible="{Binding SidebarSelParameter}"/>
+              <Button Classes="um-sidebar-nav"
+                      Foreground="{Binding SidebarSelParameter, Converter={StaticResource UmSidebarFg}}"
+                      Command="{Binding SelectSidebarSectionCommand}" CommandParameter="parameter">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                  <TextBlock Text="&#x2630;" FontSize="16" VerticalAlignment="Center"/>
+                  <TextBlock Text="参数管理" VerticalAlignment="Center"/>
+                </StackPanel>
+              </Button>
+            </Grid>
+            <!-- 检查人员（已隐藏）
+            <Grid Margin="0,0,0,2">
+              <Border CornerRadius="6" Background="#26EF9A4E"
+                      IsVisible="{Binding SidebarSelInspectors}"/>
+              <Button Classes="um-sidebar-nav"
+                      Foreground="{Binding SidebarSelInspectors, Converter={StaticResource UmSidebarFg}}"
+                      Command="{Binding SelectSidebarSectionCommand}" CommandParameter="inspectors">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                  <TextBlock Text="&#x1F46E;" FontSize="15" VerticalAlignment="Center"/>
+                  <TextBlock Text="检查人员" VerticalAlignment="Center"/>
+                </StackPanel>
+              </Button>
+            </Grid>
+            -->
+            <!-- 保护参数（已隐藏）
+            <Grid Margin="0,0,0,2">
+              <Border CornerRadius="6" Background="#26EF9A4E"
+                      IsVisible="{Binding SidebarSelProtection}"/>
+              <Button Classes="um-sidebar-nav"
+                      Foreground="{Binding SidebarSelProtection, Converter={StaticResource UmSidebarFg}}"
+                      Command="{Binding SelectSidebarSectionCommand}" CommandParameter="protection">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                  <TextBlock Text="&#x1F6E1;&#xFE0F;" FontSize="15" VerticalAlignment="Center"/>
+                  <TextBlock Text="保护参数" VerticalAlignment="Center"/>
+                </StackPanel>
+              </Button>
+            </Grid>
+            -->
+            <!-- 通讯管理 -->
+            <Grid Margin="0,0,0,2">
+              <Border CornerRadius="6" Background="#26EF9A4E"
+                      IsVisible="{Binding SidebarSelCommunication}"/>
+              <Button Classes="um-sidebar-nav"
+                      Foreground="{Binding SidebarSelCommunication, Converter={StaticResource UmSidebarFg}}"
+                      Command="{Binding SelectSidebarSectionCommand}" CommandParameter="communication">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                  <TextBlock Text="&#x1F4F6;" FontSize="15" VerticalAlignment="Center"/>
+                  <TextBlock Text="通讯管理" VerticalAlignment="Center"/>
+                </StackPanel>
+              </Button>
+            </Grid>
+          </StackPanel>
+        </ScrollViewer>
+      </Grid>
+    </Border>
+
+    <Grid Grid.Column="1" Margin="20,0,0,0" RowDefinitions="Auto,*,Auto">
+      <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+        <Panel Grid.Column="0">
+          <TextBlock Text="用户列表" FontSize="{StaticResource FsH1}"
+                     FontWeight="SemiBold" Foreground="{StaticResource BrushPrimary}"
+                     VerticalAlignment="Center"
+                     IsVisible="{Binding ShowUserListPanel}"/>
+          <TextBlock Text="{Binding SidebarPlaceholderTitle}" FontSize="{StaticResource FsH1}"
+                     FontWeight="SemiBold" Foreground="{StaticResource BrushPrimary}"
+                     VerticalAlignment="Center"
+                     IsVisible="{Binding ShowSidebarOuterTitle}"/>
+        </Panel>
+        <Button Grid.Column="1" Content="✕" Width="36" Height="36" Padding="0"
+                Background="Transparent" BorderThickness="0"
+                Foreground="{StaticResource BrushTextSecondary}"
+                Command="{Binding CloseCommand}"
+                ToolTip.Tip="返回试验主界面"/>
+      </Grid>
+
+      <!-- 用户列表 -->
+      <Border Grid.Row="1" Background="{StaticResource BrushBgPanel}"
+              BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+              CornerRadius="10" ClipToBounds="True"
+              IsVisible="{Binding ShowUserListPanel}">
+        <Grid RowDefinitions="Auto,*">
+          <Border Grid.Row="0" Background="{StaticResource BrushPrimary}" Padding="12,10">
+            <Grid ColumnDefinitions="240,200,120,*">
+              <TextBlock Grid.Column="0" Text="用户名" FontWeight="SemiBold"
+                         Foreground="{StaticResource BrushBgTitlebar}" VerticalAlignment="Center"/>
+              <TextBlock Grid.Column="1" Text="工号" FontWeight="SemiBold"
+                         Foreground="{StaticResource BrushBgTitlebar}" VerticalAlignment="Center"/>
+              <TextBlock Grid.Column="2" Text="权限" FontWeight="SemiBold"
+                         Foreground="{StaticResource BrushBgTitlebar}" VerticalAlignment="Center"/>
+              <TextBlock Grid.Column="3" Text="班组名称" FontWeight="SemiBold"
+                         Foreground="{StaticResource BrushBgTitlebar}" VerticalAlignment="Center"/>
+            </Grid>
+          </Border>
+
+          <ListBox x:Name="UsersList" Grid.Row="1"
+                   ItemsSource="{Binding Users}" SelectedItem="{Binding SelectedUser}"
+                   Background="Transparent" BorderThickness="0"
+                   ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                   ScrollViewer.VerticalScrollBarVisibility="Auto"
+                   DoubleTapped="OnUsersDoubleTapped">
+            <ListBox.Styles>
+              <Style Selector="ListBoxItem">
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Margin" Value="0"/>
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+              </Style>
+              <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+                <Setter Property="Background" Value="Transparent"/>
+              </Style>
+              <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                <Setter Property="Background" Value="Transparent"/>
+              </Style>
+              <Style Selector="ListBoxItem Border.user-row">
+                <Setter Property="Background" Value="{StaticResource BrushBgPanel}"/>
+              </Style>
+              <Style Selector="ListBoxItem:pointerover Border.user-row">
+                <Setter Property="Background" Value="#25FFFFFF"/>
+              </Style>
+              <Style Selector="ListBoxItem:selected Border.user-row">
+                <Setter Property="Background" Value="#FFFFFFFF"/>
+              </Style>
+              <Style Selector="ListBoxItem Border.user-row TextBlock">
+                <Setter Property="Foreground" Value="{StaticResource BrushTextPrimary}"/>
+              </Style>
+              <Style Selector="ListBoxItem:selected Border.user-row TextBlock">
+                <Setter Property="Foreground" Value="#FF1A1D23"/>
+              </Style>
+            </ListBox.Styles>
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:UserListItemViewModel">
+                <Border Classes="user-row"
+                        BorderBrush="{StaticResource BrushBorder}" BorderThickness="0,0,0,1"
+                        Padding="12,10">
+                  <Grid ColumnDefinitions="240,200,120,*">
+                    <TextBlock Grid.Column="0" Text="{Binding UserName}" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Grid.Column="1" Text="{Binding JobNumber}" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Grid.Column="2" Text="{Binding RoleDisplay}" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="3" Text="{Binding TeamName}" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"/>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </Grid>
+      </Border>
+
+      <!-- 型号管理：产品类型 + 型号列表 / 编辑区 + 底部操作 -->
+      <Border Grid.Row="1" Background="{StaticResource BrushBgPanel}"
+              BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+              CornerRadius="10" ClipToBounds="True" Padding="20,18"
+              IsVisible="{Binding ShowModelManagementPanel}">
+        <Grid RowDefinitions="Auto,*">
+          <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Margin="0,0,0,16">
+            <TextBlock Grid.Column="0" Text="产品类型" VerticalAlignment="Center"
+                       Foreground="{StaticResource BrushTextPrimary}" Margin="0,0,12,0"/>
+            <TextBox Grid.Column="1" Text="{Binding ProductTypeCategory}" MaxWidth="520"
+                     HorizontalAlignment="Center" MinWidth="280"
+                     Tag="产品类型" GotFocus="OnUmParamGotFocus" LostFocus="OnUmParamLostFocus"/>
+          </Grid>
+          <Grid Grid.Row="1" ColumnDefinitions="*,*" MinHeight="320">
+            <Border Grid.Column="0" BorderBrush="{StaticResource BrushBorder}"
+                    BorderThickness="0,0,1,0" Padding="0,0,16,0">
+              <Grid RowDefinitions="Auto,Auto,*">
+                <TextBlock Grid.Row="0" Text="型号列表" FontSize="13" FontWeight="SemiBold"
+                           Foreground="{StaticResource BrushTextPrimary}"
+                           HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                <Border Grid.Row="1" Background="{StaticResource BrushPrimary}" Padding="10,8">
+                  <Grid ColumnDefinitions="*,*">
+                    <TextBlock Grid.Column="0" Text="型号" FontWeight="SemiBold"
+                               Foreground="{StaticResource BrushBgTitlebar}"/>
+                    <TextBlock Grid.Column="1" Text="备注" FontWeight="SemiBold"
+                               Foreground="{StaticResource BrushBgTitlebar}"/>
+                  </Grid>
+                </Border>
+                <ListBox Grid.Row="2" ItemsSource="{Binding ProductModels}"
+                         SelectedItem="{Binding SelectedProductModel}"
+                         Background="Transparent" BorderThickness="0"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto">
+                  <ListBox.Styles>
+                    <Style Selector="ListBoxItem">
+                      <Setter Property="Padding" Value="0"/>
+                      <Setter Property="Margin" Value="0"/>
+                      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    </Style>
+                    <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+                      <Setter Property="Background" Value="Transparent"/>
+                    </Style>
+                    <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                      <Setter Property="Background" Value="Transparent"/>
+                    </Style>
+                    <Style Selector="ListBoxItem Border.model-row">
+                      <Setter Property="Background" Value="{StaticResource BrushBgPanel}"/>
+                    </Style>
+                    <Style Selector="ListBoxItem:pointerover Border.model-row">
+                      <Setter Property="Background" Value="#25FFFFFF"/>
+                    </Style>
+                    <Style Selector="ListBoxItem:selected Border.model-row">
+                      <Setter Property="Background" Value="#FFF5EBE0"/>
+                    </Style>
+                    <Style Selector="ListBoxItem Border.model-row TextBlock">
+                      <Setter Property="Foreground" Value="{StaticResource BrushTextPrimary}"/>
+                    </Style>
+                    <Style Selector="ListBoxItem:selected Border.model-row TextBlock">
+                      <Setter Property="Foreground" Value="#FF1A1D23"/>
+                    </Style>
+                  </ListBox.Styles>
+                  <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ProductModelRowViewModel">
+                      <Border Classes="model-row"
+                              BorderBrush="{StaticResource BrushBorder}" BorderThickness="0,0,0,1"
+                              Padding="10,8">
+                        <Grid ColumnDefinitions="*,*">
+                          <TextBlock Grid.Column="0" Text="{Binding ModelName}"
+                                     VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                          <TextBlock Grid.Column="1" Text="{Binding Remark}"
+                                     VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ListBox.ItemTemplate>
+                </ListBox>
+              </Grid>
+            </Border>
+            <StackPanel Grid.Column="1" Margin="20,0,0,0" Spacing="14" VerticalAlignment="Top">
+              <StackPanel Spacing="6">
+                <TextBlock Text="产品型号" FontSize="{StaticResource FsSmall}"
+                           Foreground="{StaticResource BrushTextSecondary}"/>
+                <TextBox Text="{Binding EditProductModelName}" Watermark="请输入"
+                         MinHeight="40"
+                         Tag="产品型号" GotFocus="OnUmParamGotFocus" LostFocus="OnUmParamLostFocus"/>
+              </StackPanel>
+              <StackPanel Spacing="6">
+                <TextBlock Text="备注" FontSize="{StaticResource FsSmall}"
+                           Foreground="{StaticResource BrushTextSecondary}"/>
+                <TextBox Text="{Binding EditProductRemark}" Watermark="请输入"
+                         MinHeight="40"
+                         Tag="备注" GotFocus="OnUmParamGotFocus" LostFocus="OnUmParamLostFocus"/>
+              </StackPanel>
+            </StackPanel>
+          </Grid>
+        </Grid>
+      </Border>
+
+      <!-- 参数管理：轴承退卸工艺参数（点表 HD/M）→ 保存到 Para.ini -->
+      <Border Grid.Row="1" Background="#FF2C2F36"
+              BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+              CornerRadius="10" ClipToBounds="True" Padding="20,16"
+              IsVisible="{Binding ShowParameterManagementPanel}">
+        <Grid RowDefinitions="Auto,Auto,*,Auto">
+          <TextBlock Grid.Row="0" Text="参数设置" FontSize="18" FontWeight="SemiBold"
+                     Foreground="#FFFFFFFF" HorizontalAlignment="Center"
+                     Margin="0,0,0,14"/>
+          <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto,Auto" Margin="0,0,0,16">
+            <TextBlock Grid.Column="0" Text="参数节" VerticalAlignment="Center"
+                       Foreground="{StaticResource BrushTextPrimary}" Margin="0,0,10,0"/>
+            <TextBox Grid.Column="1" Text="{Binding ParameterName}" MinHeight="40"
+                     HorizontalAlignment="Stretch" Watermark="输入名称后点保存可新建"
+                     ToolTip.Tip="输入名称并保存，会在 Para.ini 新建一节（内容为目标压力等工艺参数）"/>
+            <ComboBox Grid.Column="2" ItemsSource="{Binding ParameterNames}"
+                      SelectedItem="{Binding ParameterName}"
+                      MinWidth="120" Margin="6,0,0,0" VerticalAlignment="Center"
+                      ToolTip.Tip="已有参数节"/>
+            <Button Grid.Column="3" Content="加载参数" VerticalAlignment="Center"
+                    MinWidth="100" Margin="6,0,0,0" Padding="14,0"
+                    Command="{Binding LoadParameterCommand}"/>
+          </Grid>
+          <Border Grid.Row="2" Background="#FF25282E" BorderBrush="{StaticResource BrushBorder}"
+                  BorderThickness="1" CornerRadius="8" Padding="16,14">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+              <StackPanel Spacing="14">
+                <Border Background="#FF3E424B" CornerRadius="4" Padding="10,6"
+                        HorizontalAlignment="Center">
+                  <TextBlock Text="轴承退卸工艺参数" FontSize="12" FontWeight="SemiBold"
+                             Foreground="{StaticResource BrushTextPrimary}"/>
+                </Border>
+
+                <Grid ColumnDefinitions="180,*,Auto,180,*,Auto" RowDefinitions="Auto,Auto,Auto">
+                  <TextBlock Grid.Row="0" Grid.Column="0" Text="目标压力" TextAlignment="Right"
+                             VerticalAlignment="Center" Foreground="{StaticResource BrushTextSecondary}" Margin="0,0,10,8"/>
+                  <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ParamTargetPressureText}" Watermark="请输入 0~30"
+                           Margin="0,0,8,8" MinHeight="40" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"/>
+                  <TextBlock Grid.Row="0" Grid.Column="2" Text="MPa" VerticalAlignment="Center"
+                             Foreground="{StaticResource BrushTextTertiary}" Margin="0,0,20,8"/>
+
+                  <TextBlock Grid.Row="0" Grid.Column="3" Text="位移补充值" TextAlignment="Right"
+                             VerticalAlignment="Center" Foreground="{StaticResource BrushTextSecondary}" Margin="0,0,10,8"/>
+                  <TextBox Grid.Row="0" Grid.Column="4" Text="{Binding ParamDisplacementOffsetText}" Watermark="请输入"
+                           Margin="0,0,8,8" MinHeight="40" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"/>
+                  <TextBlock Grid.Row="0" Grid.Column="5" Text="mm" VerticalAlignment="Center"
+                             Foreground="{StaticResource BrushTextTertiary}" Margin="0,0,0,8"/>
+
+                  <TextBlock Grid.Row="1" Grid.Column="0" Text="开始减速压力" TextAlignment="Right"
+                             VerticalAlignment="Center" Foreground="{StaticResource BrushTextSecondary}" Margin="0,0,10,8"/>
+                  <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ParamDecelerationThresholdText}" Watermark="请输入"
+                           Margin="0,0,8,8" MinHeight="40" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"/>
+                  <TextBlock Grid.Row="1" Grid.Column="2" Text="bar" VerticalAlignment="Center"
+                             Foreground="{StaticResource BrushTextTertiary}" Margin="0,0,20,8"/>
+
+                  <TextBlock Grid.Row="1" Grid.Column="3" Text="高压浮动限制T" TextAlignment="Right"
+                             VerticalAlignment="Center" Foreground="{StaticResource BrushTextSecondary}" Margin="0,0,10,8"/>
+                  <TextBox Grid.Row="1" Grid.Column="4" Text="{Binding ParamHighPressureFloatLimitText}" Watermark="请输入"
+                           Margin="0,0,8,8" MinHeight="40" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"/>
+                  <TextBlock Grid.Row="1" Grid.Column="5" Text="" VerticalAlignment="Center" Margin="0,0,0,8"/>
+
+                  <TextBlock Grid.Row="2" Grid.Column="0" Text="反向时间" TextAlignment="Right"
+                             VerticalAlignment="Center" Foreground="{StaticResource BrushTextSecondary}" Margin="0,0,10,0"/>
+                  <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding ParamReverseTimeText}" Watermark="请输入"
+                           Margin="0,0,8,0" MinHeight="40" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"/>
+                  <TextBlock Grid.Row="2" Grid.Column="2" Text="S" VerticalAlignment="Center"
+                             Foreground="{StaticResource BrushTextTertiary}" Margin="0,0,20,0"/>
+
+                  <TextBlock Grid.Row="2" Grid.Column="3" Text="快速慢速设置" TextAlignment="Right"
+                             VerticalAlignment="Center" Foreground="{StaticResource BrushTextSecondary}" Margin="0,0,10,0"/>
+                  <ComboBox Grid.Row="2" Grid.Column="4" SelectedIndex="{Binding ParamFastSlowSelectedIndex}"
+                            MinHeight="40" Margin="0,0,8,0" HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center">
+                    <ComboBoxItem Content="慢速 (0)"/>
+                    <ComboBoxItem Content="快速 (1)"/>
+                  </ComboBox>
+                  <TextBlock Grid.Row="2" Grid.Column="5" Text="M421" VerticalAlignment="Center"
+                             Foreground="{StaticResource BrushTextTertiary}"/>
+                </Grid>
+
+                <Border Background="#FF3E424B" CornerRadius="4" Padding="10,6"
+                        HorizontalAlignment="Center" Margin="0,6,0,0">
+                  <TextBlock Text="设备限位（说明书）" FontSize="12" FontWeight="SemiBold"
+                             Foreground="{StaticResource BrushTextPrimary}"/>
+                </Border>
+                <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto">
+                  <TextBlock Grid.Row="0" Grid.Column="0" Text="工作行程：400 mm" Margin="8,4"
+                             Foreground="{StaticResource BrushTextSecondary}"/>
+                  <TextBlock Grid.Row="0" Grid.Column="1" Text="工作承载：30 T" Margin="8,4"
+                             Foreground="{StaticResource BrushTextSecondary}"/>
+                  <TextBlock Grid.Row="0" Grid.Column="2" Text="马达功率：7.5 kW" Margin="8,4"
+                             Foreground="{StaticResource BrushTextSecondary}"/>
+                  <TextBlock Grid.Row="1" Grid.Column="0" Text="油箱容量：40 L（B系）" Margin="8,4"
+                             Foreground="{StaticResource BrushTextSecondary}"/>
+                  <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                             Text="电源：三相 AC380V 50Hz　压力上限：30 MPa" Margin="8,4"
+                             Foreground="{StaticResource BrushTextSecondary}"/>
+                </Grid>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="12" Margin="0,4,0,0">
+                  <Button Content="恢复默认参数" MinWidth="140" MinHeight="40" Padding="16,0"
+                          Command="{Binding RestoreDefaultParametersCommand}"
+                          ToolTip.Tip="脉冲触发 PLC M403"/>
+                </StackPanel>
+              </StackPanel>
+            </ScrollViewer>
+          </Border>
+          <Button Grid.Row="3" Content="保存" MinWidth="100" HorizontalAlignment="Center"
+                  Margin="0,16,0,0"
+                  Command="{Binding SaveParameterCommand}"
+                  ToolTip.Tip="按上方「参数节」名称写入 Para.ini（不存在则新建）"/>
+        </Grid>
+      </Border>
+
+      <!-- 检查人员：表格 + 录入区 + 底部操作按钮 -->
+      <Border Grid.Row="1" Background="#FF2C2F36"
+              BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+              CornerRadius="10" ClipToBounds="False" Padding="16,14"
+              VerticalAlignment="Stretch"
+              IsVisible="{Binding ShowInspectorsPanel}">
+        <Grid RowDefinitions="*,Auto,Auto">
+          <dg:DataGrid Grid.Row="0"
+                       ItemsSource="{Binding Inspectors}"
+                       SelectedItem="{Binding SelectedInspector}"
+                       IsReadOnly="True"
+                       AutoGenerateColumns="False"
+                       HeadersVisibility="Column"
+                       HorizontalScrollBarVisibility="Auto"
+                       VerticalScrollBarVisibility="Auto"
+                       GridLinesVisibility="Horizontal"
+                       MinHeight="160"
+                       VerticalAlignment="Stretch"
+                       Margin="0">
+            <dg:DataGrid.Columns>
+              <DataGridTextColumn Header="辅助人工号1" Binding="{Binding AssistJob1}" Width="172"/>
+              <DataGridTextColumn Header="辅助人姓名1" Binding="{Binding AssistName1}" Width="140"/>
+              <DataGridTextColumn Header="辅助人工号2" Binding="{Binding AssistJob2}" Width="172"/>
+              <DataGridTextColumn Header="辅助人姓名2" Binding="{Binding AssistName2}" Width="140"/>
+              <DataGridTextColumn Header="辅助人工号3" Binding="{Binding AssistJob3}" Width="172"/>
+              <DataGridTextColumn Header="辅助人姓名3" Binding="{Binding AssistName3}" Width="140"/>
+              <DataGridTextColumn Header="辅助人工号4" Binding="{Binding AssistJob4}" Width="172"/>
+              <DataGridTextColumn Header="辅助人姓名4" Binding="{Binding AssistName4}" Width="140"/>
+              <DataGridTextColumn Header="互检人工号" Binding="{Binding MutualJob}" Width="148"/>
+              <DataGridTextColumn Header="互检人姓名" Binding="{Binding MutualName}" Width="128"/>
+              <DataGridTextColumn Header="质检人工号" Binding="{Binding QualityJob}" Width="148"/>
+              <DataGridTextColumn Header="质检人姓名" Binding="{Binding QualityName}" Width="128"/>
+            </dg:DataGrid.Columns>
+          </dg:DataGrid>
+          <Grid Grid.Row="1" ColumnDefinitions="132,*,132,*"
+                RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto"
+                VerticalAlignment="Top"
+                Margin="0">
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="辅助人工号1" VerticalAlignment="Center"
+                       Foreground="{StaticResource BrushTextSecondary}" Margin="0,0,12,8"
+                       TextWrapping="Wrap"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding EditAssistJob1}" Watermark="请输入" MinHeight="40"
+                     Margin="0,0,20,8"/>
+            <TextBlock Grid.Row="0" Grid.Column="2" Text="辅助人姓名1" VerticalAlignment="Center"
+                       Foreground="{StaticResource BrushTextSecondary}" Margin="0,0,12,8"
+                       TextWrapping="Wrap"/>
+            <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding EditAssistName1}" Watermark="请输入" MinHeight="40"
+                     Margin="0,0,0,8"/>
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="辅助人工号2" VerticalAlignment="Center"
+                       Foreground="{StaticResource BrushTextSecondary}" Margin="0,0,12,8"
+                       TextWrapping="Wrap"/>
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding EditAssistJob2}" Watermark="请输入" MinHeight="40"
+                     Margin="0,0,20,8"/>
+            <TextBlock Grid.Row="1" Grid.Column="2" Text="辅助人姓名2" VerticalAlignment="Center"
+                       Foreground="{StaticResource BrushTextSecondary}" Margin="0,0,12,8"
+                       TextWrapping="Wrap"/>
+            <TextBox Grid.Row="1" Grid.Column="3" Text="{Binding EditAssistName2}" Watermark="请输入" MinHeight="40"
+                     Margin="0,0,0,8"/>
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="辅助人工号3" VerticalAlignment="Center"
+                       Foreground="{StaticResource BrushTextSecondary}" Margin="0,0,12,8"
+                       TextWrapping="Wrap"/>
+            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding EditAssistJob3}" Watermark="请输入" MinHeight="40"
+                     Margin="0,0,20,8"/>
+            <TextBlock Grid.Row="2" Grid.Column="2" Text="辅助人姓名3" VerticalAlignment="Center"
+                       Foreground="{StaticResource BrushTextSecondary}" Margin="0,0,12,8"
+                       TextWrapping="Wrap"/>
+            <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding EditAssistName3}" Watermark="请输入" MinHeight="40"
+                     Margin="0,0,0,8"/>
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="辅助人工号4" VerticalAlignment="Center"
+                       Foreground="{StaticResource BrushTextSecondary}" Margin="0,0,12,8"
+                       TextWrapping="Wrap"/>
+            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding EditAssistJob4}" Watermark="请输入" MinHeight="40"
+                     Margin="0,0,20,8"/>
+            <TextBlock Grid.Row="3" Grid.Column="2" Text="辅助人姓名4" VerticalAlignment="Center"
+                       Foreground="{StaticResource BrushTextSecondary}" Margin="0,0,12,8"
+                       TextWrapping="Wrap"/>
+            <TextBox Grid.Row="3" Grid.Column="3" Text="{Binding EditAssistName4}" Watermark="请输入" MinHeight="40"
+                     Margin="0,0,0,8"/>
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="互检人工号" VerticalAlignment="Center"
+                       Foreground="{StaticResource BrushTextSecondary}" Margin="0,0,12,8"
+                       TextWrapping="Wrap"/>
+            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding EditMutualJob}" Watermark="请输入" MinHeight="40"
+                     Margin="0,0,20,8"/>
+            <TextBlock Grid.Row="4" Grid.Column="2" Text="互检人姓名" VerticalAlignment="Center"
+                       Foreground="{StaticResource BrushTextSecondary}" Margin="0,0,12,8"
+                       TextWrapping="Wrap"/>
+            <TextBox Grid.Row="4" Grid.Column="3" Text="{Binding EditMutualName}" Watermark="请输入" MinHeight="40"
+                     Margin="0,0,0,8"/>
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="质检人工号" VerticalAlignment="Center"
+                       Foreground="{StaticResource BrushTextSecondary}" Margin="0,0,12,8"
+                       TextWrapping="Wrap"/>
+            <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding EditQualityJob}" Watermark="请输入" MinHeight="40"
+                     Margin="0,0,20,8"/>
+            <TextBlock Grid.Row="5" Grid.Column="2" Text="质检人姓名" VerticalAlignment="Center"
+                       Foreground="{StaticResource BrushTextSecondary}" Margin="0,0,12,8"
+                       TextWrapping="Wrap"/>
+            <TextBox Grid.Row="5" Grid.Column="3" Text="{Binding EditQualityName}" Watermark="请输入" MinHeight="40"
+                     Margin="0,0,0,8"/>
+          </Grid>
+          <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
+                      Spacing="24" Margin="0,0,0,6">
+            <Button MinWidth="168" MinHeight="52" FontSize="16" Padding="36,0"
+                    Content="新增" Command="{Binding AddInspectorCommand}"/>
+            <Button MinWidth="168" MinHeight="52" FontSize="16" Padding="36,0"
+                    Content="删除" Command="{Binding DeleteInspectorCommand}"/>
+            <Button MinWidth="168" MinHeight="52" FontSize="16" Padding="36,0"
+                    Content="修改" Command="{Binding ChangeInspectorCommand}"/>
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <!-- 保护参数：18 项计数（双列）+ 右下角保存；无整页滚动 -->
+      <Border Grid.Row="1" Background="#FF2C2F36"
+              BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+              CornerRadius="10" ClipToBounds="True" Padding="28,22"
+              IsVisible="{Binding ShowProtectionParametersPanel}">
+        <Grid RowDefinitions="*,Auto">
+          <Grid Grid.Row="0" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+            <!-- 左列 -->
+            <Grid Grid.Row="0" Grid.Column="0" ColumnDefinitions="158,*,28" Margin="0,0,20,10" VerticalAlignment="Center">
+              <TextBlock Grid.Column="0" Text="急停计数" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13" TextAlignment="Right" TextWrapping="Wrap" Margin="0,0,4,0"/>
+              <TextBox Grid.Column="1" Text="{Binding ProtEmergencyStop, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                       Background="#FF3E424B" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF"/>
+              <TextBlock Grid.Column="2" Text="次" VerticalAlignment="Center" Foreground="#FFB4B2A9" Margin="6,0,0,0"/>
+            </Grid>
+            <Grid Grid.Row="1" Grid.Column="0" ColumnDefinitions="158,*,28" Margin="0,0,20,10" VerticalAlignment="Center">
+              <TextBlock Grid.Column="0" Text="接地报警计数" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13" TextAlignment="Right" TextWrapping="Wrap" Margin="0,0,4,0"/>
+              <TextBox Grid.Column="1" Text="{Binding ProtGroundAlarm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                       Background="#FF3E424B" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF"/>
+              <TextBlock Grid.Column="2" Text="次" VerticalAlignment="Center" Foreground="#FFB4B2A9" Margin="6,0,0,0"/>
+            </Grid>
+            <Grid Grid.Row="2" Grid.Column="0" ColumnDefinitions="158,*,28" Margin="0,0,20,10" VerticalAlignment="Center">
+              <TextBlock Grid.Column="0" Text="电铃计数" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13" TextAlignment="Right" TextWrapping="Wrap" Margin="0,0,4,0"/>
+              <TextBox Grid.Column="1" Text="{Binding ProtBell, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                       Background="#FF3E424B" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF"/>
+              <TextBlock Grid.Column="2" Text="次" VerticalAlignment="Center" Foreground="#FFB4B2A9" Margin="6,0,0,0"/>
+            </Grid>
+            <Grid Grid.Row="3" Grid.Column="0" ColumnDefinitions="158,*,28" Margin="0,0,20,10" VerticalAlignment="Center">
+              <TextBlock Grid.Column="0" Text="门联锁计数" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13" TextAlignment="Right" TextWrapping="Wrap" Margin="0,0,4,0"/>
+              <TextBox Grid.Column="1" Text="{Binding ProtDoorInterlock, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                       Background="#FF3E424B" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF"/>
+              <TextBlock Grid.Column="2" Text="次" VerticalAlignment="Center" Foreground="#FFB4B2A9" Margin="6,0,0,0"/>
+            </Grid>
+            <Grid Grid.Row="4" Grid.Column="0" ColumnDefinitions="158,*,28" Margin="0,0,20,10" VerticalAlignment="Center">
+              <TextBlock Grid.Column="0" Text="调压底限计数" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13" TextAlignment="Right" TextWrapping="Wrap" Margin="0,0,4,0"/>
+              <TextBox Grid.Column="1" Text="{Binding ProtVoltageRegLow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                       Background="#FF3E424B" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF"/>
+              <TextBlock Grid.Column="2" Text="次" VerticalAlignment="Center" Foreground="#FFB4B2A9" Margin="6,0,0,0"/>
+            </Grid>
+            <Grid Grid.Row="5" Grid.Column="0" ColumnDefinitions="158,*,28" Margin="0,0,20,10" VerticalAlignment="Center">
+              <TextBlock Grid.Column="0" Text="调压高限计数" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13" TextAlignment="Right" TextWrapping="Wrap" Margin="0,0,4,0"/>
+              <TextBox Grid.Column="1" Text="{Binding ProtVoltageRegHigh, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                       Background="#FF3E424B" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF"/>
+              <TextBlock Grid.Column="2" Text="次" VerticalAlignment="Center" Foreground="#FFB4B2A9" Margin="6,0,0,0"/>
+            </Grid>
+            <Grid Grid.Row="6" Grid.Column="0" ColumnDefinitions="158,*,28" Margin="0,0,20,10" VerticalAlignment="Center">
+              <TextBlock Grid.Column="0" Text="调压电机报警计数" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13" TextAlignment="Right" TextWrapping="Wrap" Margin="0,0,4,0"/>
+              <TextBox Grid.Column="1" Text="{Binding ProtVoltageRegMotorAlarm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                       Background="#FF3E424B" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF"/>
+              <TextBlock Grid.Column="2" Text="次" VerticalAlignment="Center" Foreground="#FFB4B2A9" Margin="6,0,0,0"/>
+            </Grid>
+            <Grid Grid.Row="7" Grid.Column="0" ColumnDefinitions="158,*,28" Margin="0,0,20,10" VerticalAlignment="Center">
+              <TextBlock Grid.Column="0" Text="主接触器计数" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13" TextAlignment="Right" TextWrapping="Wrap" Margin="0,0,4,0"/>
+              <TextBox Grid.Column="1" Text="{Binding ProtMainContactor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                       Background="#FF3E424B" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF"/>
+              <TextBlock Grid.Column="2" Text="次" VerticalAlignment="Center" Foreground="#FFB4B2A9" Margin="6,0,0,0"/>
+            </Grid>
+            <Grid Grid.Row="8" Grid.Column="0" ColumnDefinitions="158,*,28" Margin="0,0,20,0" VerticalAlignment="Center">
+              <TextBlock Grid.Column="0" Text="从接触器计数" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13" TextAlignment="Right" TextWrapping="Wrap" Margin="0,0,4,0"/>
+              <TextBox Grid.Column="1" Text="{Binding ProtSlaveContactor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                       Background="#FF3E424B" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF"/>
+              <TextBlock Grid.Column="2" Text="次" VerticalAlignment="Center" Foreground="#FFB4B2A9" Margin="6,0,0,0"/>
+            </Grid>
+            <!-- 右列 -->
+            <Grid Grid.Row="0" Grid.Column="1" ColumnDefinitions="108,*,28" Margin="20,0,0,10" VerticalAlignment="Center">
+              <TextBlock Grid.Column="0" Text="放电计数" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13" TextAlignment="Right" TextWrapping="Wrap" Margin="0,0,4,0"/>
+              <TextBox Grid.Column="1" Text="{Binding ProtDischarge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                       Background="#FF3E424B" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF"/>
+              <TextBlock Grid.Column="2" Text="次" VerticalAlignment="Center" Foreground="#FFB4B2A9" Margin="6,0,0,0"/>
+            </Grid>
+            <Grid Grid.Row="1" Grid.Column="1" ColumnDefinitions="108,*,28" Margin="20,0,0,10" VerticalAlignment="Center">
+              <TextBlock Grid.Column="0" Text="电动门锁计数" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13" TextAlignment="Right" TextWrapping="Wrap" Margin="0,0,4,0"/>
+              <TextBox Grid.Column="1" Text="{Binding ProtElectricDoorLock, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                       Background="#FF3E424B" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF"/>
+              <TextBlock Grid.Column="2" Text="次" VerticalAlignment="Center" Foreground="#FFB4B2A9" Margin="6,0,0,0"/>
+            </Grid>
+            <Grid Grid.Row="2" Grid.Column="1" ColumnDefinitions="108,*,28" Margin="20,0,0,10" VerticalAlignment="Center">
+              <TextBlock Grid.Column="0" Text="启动按钮计数" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13" TextAlignment="Right" TextWrapping="Wrap" Margin="0,0,4,0"/>
+              <TextBox Grid.Column="1" Text="{Binding ProtStartButton, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                       Background="#FF3E424B" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF"/>
+              <TextBlock Grid.Column="2" Text="次" VerticalAlignment="Center" Foreground="#FFB4B2A9" Margin="6,0,0,0"/>
+            </Grid>
+            <Grid Grid.Row="3" Grid.Column="1" ColumnDefinitions="108,*,28" Margin="20,0,0,10" VerticalAlignment="Center">
+              <TextBlock Grid.Column="0" Text="升压按钮计数" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13" TextAlignment="Right" TextWrapping="Wrap" Margin="0,0,4,0"/>
+              <TextBox Grid.Column="1" Text="{Binding ProtStepUpButton, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                       Background="#FF3E424B" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF"/>
+              <TextBlock Grid.Column="2" Text="次" VerticalAlignment="Center" Foreground="#FFB4B2A9" Margin="6,0,0,0"/>
+            </Grid>
+            <Grid Grid.Row="4" Grid.Column="1" ColumnDefinitions="108,*,28" Margin="20,0,0,10" VerticalAlignment="Center">
+              <TextBlock Grid.Column="0" Text="降压按钮计数" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13" TextAlignment="Right" TextWrapping="Wrap" Margin="0,0,4,0"/>
+              <TextBox Grid.Column="1" Text="{Binding ProtStepDownButton, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                       Background="#FF3E424B" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF"/>
+              <TextBlock Grid.Column="2" Text="次" VerticalAlignment="Center" Foreground="#FFB4B2A9" Margin="6,0,0,0"/>
+            </Grid>
+            <Grid Grid.Row="5" Grid.Column="1" ColumnDefinitions="108,*,28" Margin="20,0,0,10" VerticalAlignment="Center">
+              <TextBlock Grid.Column="0" Text="停止按钮计数" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13" TextAlignment="Right" TextWrapping="Wrap" Margin="0,0,4,0"/>
+              <TextBox Grid.Column="1" Text="{Binding ProtStopButton, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                       Background="#FF3E424B" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF"/>
+              <TextBlock Grid.Column="2" Text="次" VerticalAlignment="Center" Foreground="#FFB4B2A9" Margin="6,0,0,0"/>
+            </Grid>
+            <Grid Grid.Row="6" Grid.Column="1" ColumnDefinitions="108,*,28" Margin="20,0,0,10" VerticalAlignment="Center">
+              <TextBlock Grid.Column="0" Text="复位按钮计数" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13" TextAlignment="Right" TextWrapping="Wrap" Margin="0,0,4,0"/>
+              <TextBox Grid.Column="1" Text="{Binding ProtResetButton, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                       Background="#FF3E424B" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF"/>
+              <TextBlock Grid.Column="2" Text="次" VerticalAlignment="Center" Foreground="#FFB4B2A9" Margin="6,0,0,0"/>
+            </Grid>
+            <Grid Grid.Row="7" Grid.Column="1" ColumnDefinitions="108,*,28" Margin="20,0,0,10" VerticalAlignment="Center">
+              <TextBlock Grid.Column="0" Text="计时按钮计数" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13" TextAlignment="Right" TextWrapping="Wrap" Margin="0,0,4,0"/>
+              <TextBox Grid.Column="1" Text="{Binding ProtTimerButton, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                       Background="#FF3E424B" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF"/>
+              <TextBlock Grid.Column="2" Text="次" VerticalAlignment="Center" Foreground="#FFB4B2A9" Margin="6,0,0,0"/>
+            </Grid>
+            <Grid Grid.Row="8" Grid.Column="1" ColumnDefinitions="108,*,28" Margin="20,0,0,0" VerticalAlignment="Center">
+              <TextBlock Grid.Column="0" Text="计数器计数" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13" TextAlignment="Right" TextWrapping="Wrap" Margin="0,0,4,0"/>
+              <TextBox Grid.Column="1" Text="{Binding ProtCounter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                       Background="#FF3E424B" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF"/>
+              <TextBlock Grid.Column="2" Text="次" VerticalAlignment="Center" Foreground="#FFB4B2A9" Margin="6,0,0,0"/>
+            </Grid>
+          </Grid>
+          <Button Grid.Row="1" Content="保存" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                  MinWidth="120" MinHeight="42" Margin="0,20,0,0" Padding="20,0"
+                  Background="#FF4A5058" BorderBrush="#FF5B6270" Foreground="#FFFFFFFF"
+                  Command="{Binding SaveProtectionParametersCommand}"/>
+        </Grid>
+      </Border>
+
+      <!-- 通讯管理 -->
+      <Border Grid.Row="1" Background="#FF2C2F36"
+              BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+              CornerRadius="10" ClipToBounds="True" Padding="28,22"
+              IsVisible="{Binding ShowCommunicationPanel}">
+        <Grid RowDefinitions="*,Auto">
+          <Grid Grid.Row="0" ColumnDefinitions="*">
+            <!-- PLC 设置 -->
+            <Border Grid.Column="0" Background="#FF3E424B" CornerRadius="8" Padding="16,12" Margin="0,0,12,0">
+              <StackPanel Spacing="10">
+                <TextBlock Text="PLC 设置" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFFFF" Margin="0,0,0,8"/>
+                <Grid ColumnDefinitions="100,*">
+                  <TextBlock Grid.Column="0" Text="有效" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13"/>
+                  <CheckBox Grid.Column="1" IsChecked="{Binding CommPlcEnabled, Mode=TwoWay}" Margin="8,0"
+                            Background="#FF2C2F36" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF"/>
+                </Grid>
+                <Grid ColumnDefinitions="100,*">
+                  <TextBlock Grid.Column="0" Text="IP 地址" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13"/>
+                  <TextBox Grid.Column="1" Text="{Binding CommPlcIp, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                           Background="#FF2C2F36" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF" Margin="8,0"/>
+                </Grid>
+                <Grid ColumnDefinitions="100,*">
+                  <TextBlock Grid.Column="0" Text="OPC映射文件" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13"/>
+                  <TextBox Grid.Column="1" Text="{Binding CommPlcCsvFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                           Background="#FF2C2F36" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF" Margin="8,0"/>
+                </Grid>
+              </StackPanel>
+            </Border>
+
+            <!-- 温湿度传感器（已隐藏）
+            <Border Grid.Column="1" Background="#FF3E424B" CornerRadius="8" Padding="16,12" Margin="6,0,6,0">
+              <StackPanel Spacing="10">
+                <TextBlock Text="温湿度传感器" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFFFF" Margin="0,0,0,8"/>
+                <Grid ColumnDefinitions="100,*">
+                  <TextBlock Grid.Column="0" Text="串口" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13"/>
+                  <ComboBox Grid.Column="1" ItemsSource="{Binding ComPorts}" 
+                            SelectedItem="{Binding CommTempHumiPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Width="180" MinHeight="36" Margin="8,0"
+                            Background="#FF2C2F36" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF">
+                    <ComboBox.Styles>
+                      <Style Selector="ComboBoxItem">
+                        <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                        <Setter Property="Background" Value="#FF2C2F36"/>
+                        <Setter Property="Padding" Value="5,2"/>
+                      </Style>
+                      <Style Selector="ComboBoxItem:pointerover">
+                        <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                        <Setter Property="Background" Value="#FF4A5058"/>
+                      </Style>
+                      <Style Selector="ComboBoxItem:selected">
+                        <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                        <Setter Property="Background" Value="#FF0078D7"/>
+                      </Style>
+                    </ComboBox.Styles>
+                  </ComboBox>
+                </Grid>
+                <Grid ColumnDefinitions="100,*">
+                  <TextBlock Grid.Column="0" Text="波特率" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13"/>
+                  <TextBox Grid.Column="1" Text="{Binding CommTempHumiBaudRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                           Background="#FF2C2F36" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF" Margin="8,0"/>
+                </Grid>
+              </StackPanel>
+            </Border>
+            -->
+
+            <!-- 绝缘耐压仪（已隐藏）
+            <Border Grid.Column="2" Background="#FF3E424B" CornerRadius="8" Padding="16,12" Margin="6,0,6,0">
+              <StackPanel Spacing="10">
+                <TextBlock Text="绝缘耐压仪" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFFFF" Margin="0,0,0,8"/>
+                <Grid ColumnDefinitions="100,*">
+                  <TextBlock Grid.Column="0" Text="串口" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13"/>
+                  <ComboBox Grid.Column="1" ItemsSource="{Binding ComPorts}" 
+                            SelectedItem="{Binding CommInsulationPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Width="180" MinHeight="36" Margin="8,0"
+                            Background="#FF2C2F36" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF">
+                    <ComboBox.Styles>
+                      <Style Selector="ComboBoxItem">
+                        <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                        <Setter Property="Background" Value="#FF2C2F36"/>
+                        <Setter Property="Padding" Value="5,2"/>
+                      </Style>
+                      <Style Selector="ComboBoxItem:pointerover">
+                        <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                        <Setter Property="Background" Value="#FF4A5058"/>
+                      </Style>
+                      <Style Selector="ComboBoxItem:selected">
+                        <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                        <Setter Property="Background" Value="#FF0078D7"/>
+                      </Style>
+                    </ComboBox.Styles>
+                  </ComboBox>
+                </Grid>
+                <Grid ColumnDefinitions="100,*">
+                  <TextBlock Grid.Column="0" Text="波特率" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13"/>
+                  <TextBox Grid.Column="1" Text="{Binding CommInsulationBaudRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                           Background="#FF2C2F36" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF" Margin="8,0"/>
+                </Grid>
+              </StackPanel>
+            </Border>
+            -->
+
+            <!-- 匝间耐压（已隐藏）
+            <Border Grid.Column="3" Background="#FF3E424B" CornerRadius="8" Padding="16,12" Margin="12,0,0,0">
+              <StackPanel Spacing="10">
+                <TextBlock Text="匝间耐压" FontSize="14" FontWeight="SemiBold" Foreground="#FFFFFFFF" Margin="0,0,0,8"/>
+                <Grid ColumnDefinitions="100,*">
+                  <TextBlock Grid.Column="0" Text="串口" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13"/>
+                  <ComboBox Grid.Column="1" ItemsSource="{Binding ComPorts}" 
+                            SelectedItem="{Binding CommTurnPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Width="180" MinHeight="36" Margin="8,0"
+                            Background="#FF2C2F36" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF">
+                    <ComboBox.Styles>
+                      <Style Selector="ComboBoxItem">
+                        <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                        <Setter Property="Background" Value="#FF2C2F36"/>
+                        <Setter Property="Padding" Value="5,2"/>
+                      </Style>
+                      <Style Selector="ComboBoxItem:pointerover">
+                        <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                        <Setter Property="Background" Value="#FF4A5058"/>
+                      </Style>
+                      <Style Selector="ComboBoxItem:selected">
+                        <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                        <Setter Property="Background" Value="#FF0078D7"/>
+                      </Style>
+                    </ComboBox.Styles>
+                  </ComboBox>
+                </Grid>
+                <Grid ColumnDefinitions="100,*">
+                  <TextBlock Grid.Column="0" Text="波特率" VerticalAlignment="Center" Foreground="#FFFFFFFF" FontSize="13"/>
+                  <TextBox Grid.Column="1" Text="{Binding CommTurnBaudRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="36"
+                           Background="#FF2C2F36" BorderBrush="#FF4A5058" Foreground="#FFFFFFFF" CaretBrush="#FFFFFFFF" Margin="8,0"/>
+                </Grid>
+              </StackPanel>
+            </Border>
+            -->
+          </Grid>
+          <Button Grid.Row="1" Content="保存" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                  MinWidth="120" MinHeight="42" Margin="0,20,0,0" Padding="20,0"
+                  Background="#FF4A5058" BorderBrush="#FF5B6270" Foreground="#FFFFFFFF"
+                  Command="{Binding SaveCommunicationParametersCommand}"/>
+        </Grid>
+      </Border>
+
+      <!-- 其它侧栏项：仅占位，界面后续再接 -->
+      <Border Grid.Row="1" Background="{StaticResource BrushBgPanel}"
+              BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+              CornerRadius="10" ClipToBounds="True"
+              IsVisible="{Binding ShowSidebarPlaceholder}">
+        <TextBlock Text="该功能界面待开发"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   FontSize="14"
+                   Foreground="{StaticResource BrushTextTertiary}"/>
+      </Border>
+
+      <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="16"
+                  HorizontalAlignment="Center" Margin="0,16,0,0"
+                  IsVisible="{Binding ShowUserListPanel}">
+        <Button MinWidth="120" Content="添加" Command="{Binding AddUserCommand}"/>
+        <Button MinWidth="120" Content="删除" Command="{Binding DeleteUserCommand}"/>
+        <Button MinWidth="120" Content="更改" Command="{Binding ChangeUserCommand}"/>
+      </StackPanel>
+
+      <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="16"
+                  HorizontalAlignment="Center" Margin="0,16,0,0"
+                  IsVisible="{Binding ShowModelManagementPanel}">
+        <Button MinWidth="120" Content="新增" Command="{Binding AddModelCommand}"/>
+        <Button MinWidth="120" Content="删除" Command="{Binding DeleteModelCommand}"/>
+        <Button MinWidth="120" Content="保存" Command="{Binding ChangeModelCommand}"/>
+      </StackPanel>
+    </Grid>
+  </Grid>
+</UserControl>

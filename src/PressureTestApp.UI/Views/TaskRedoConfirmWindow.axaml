@@ -1,0 +1,43 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="PressureTestApp.UI.Views.TaskRedoConfirmWindow"
+        Title="请确认"
+        Width="520"
+        SizeToContent="Height"
+        MinHeight="220"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="#FFFFFFFF">
+  <Border BorderBrush="#FFE0E0E0" BorderThickness="1" CornerRadius="8" BoxShadow="0 8 28 0 #40000000">
+    <Grid RowDefinitions="Auto,*,Auto" Margin="0">
+      <!-- 标题行：信息图标 + 主问句 -->
+      <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Margin="20,20,20,12">
+        <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18"
+                Background="#FF2196F3" VerticalAlignment="Top" Margin="0,0,12,0">
+          <TextBlock Text="i" FontSize="20" FontWeight="Bold" Foreground="White"
+                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+        <TextBlock x:Name="QuestionTitleText" Grid.Column="1" Text="请确认任务是否重做？"
+                   FontSize="16" FontWeight="SemiBold" Foreground="#FF1A1A1A"
+                   TextWrapping="Wrap" VerticalAlignment="Center"/>
+      </Grid>
+
+      <StackPanel Grid.Row="1" Margin="20,0,20,16" Spacing="8">
+        <TextBlock x:Name="StepLine" FontSize="14" Foreground="#FFB03050" TextWrapping="Wrap"/>
+        <TextBlock x:Name="OpAreaLine" FontSize="14" Foreground="#FFB03050" TextWrapping="Wrap"/>
+        <TextBlock x:Name="OpContentLine" FontSize="14" Foreground="#FFB03050" TextWrapping="Wrap"/>
+      </StackPanel>
+
+      <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right"
+                  Spacing="12" Margin="20,0,20,20">
+        <Button Content="取消" MinWidth="88" Height="34" Padding="16,0"
+                Background="White" BorderBrush="#FFD0D0D0" BorderThickness="1"
+                Foreground="#FF1A1A1A" CornerRadius="4"
+                Click="OnCancelClick"/>
+        <Button Content="确认" MinWidth="88" Height="34" Padding="16,0"
+                Background="#FF2196F3" Foreground="White" BorderThickness="0" CornerRadius="4"
+                Click="OnConfirmClick"/>
+      </StackPanel>
+    </Grid>
+  </Border>
+</Window>

@@ -1,0 +1,42 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="PressureTestApp.UI.Views.TaskRedoSuccessWindow"
+        Title="系统消息"
+        Width="480"
+        SizeToContent="Height"
+        MinHeight="180"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="#FFFFFFFF">
+  <Border BorderBrush="#FFE0E0E0" BorderThickness="1" CornerRadius="8" BoxShadow="0 8 28 0 #40000000">
+    <Grid RowDefinitions="Auto,*,Auto" Margin="0">
+      <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Margin="20,20,20,12">
+        <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18"
+                Background="#FFFF9800" VerticalAlignment="Top" Margin="0,0,12,0">
+          <TextBlock Text="!" FontSize="22" FontWeight="Bold" Foreground="White"
+                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+        <TextBlock Grid.Column="1" Text="系统消息"
+                   FontSize="16" FontWeight="SemiBold" Foreground="#FF1A1A1A"
+                   VerticalAlignment="Center"/>
+      </Grid>
+
+      <TextBlock Grid.Row="1" Margin="20,0,20,16"
+                 Text="任务还原成功，可在[任务查看]界面中查看任务！"
+                 FontSize="14" Foreground="#FF1A1A1A" TextWrapping="Wrap"/>
+
+      <StackPanel Grid.Row="2" HorizontalAlignment="Right" Margin="20,0,20,20">
+        <Button x:Name="OkButton" Content="知道了" MinWidth="100" Height="36" Padding="20,0"
+                Foreground="White" BorderThickness="0" CornerRadius="6"
+                Click="OnOkClick">
+          <Button.Background>
+            <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%">
+              <GradientStop Offset="0" Color="#FF8360F5"/>
+              <GradientStop Offset="1" Color="#FF20C0E8"/>
+            </LinearGradientBrush>
+          </Button.Background>
+        </Button>
+      </StackPanel>
+    </Grid>
+  </Border>
+</Window>

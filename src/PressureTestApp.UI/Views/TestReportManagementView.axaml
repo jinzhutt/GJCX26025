@@ -1,0 +1,201 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:PressureTestApp.UI.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1600" d:DesignHeight="900"
+             x:Class="PressureTestApp.UI.Views.TestReportManagementView"
+             x:DataType="vm:TestReportManagementViewModel">
+
+  <Grid RowDefinitions="Auto,*,Auto">
+    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Background="{StaticResource BrushBgPanel}">
+      <TextBlock Text="试验报表管理" FontSize="{StaticResource FsH1}"
+                 FontWeight="SemiBold" Foreground="{StaticResource BrushPrimary}"
+                 Margin="16,12"/>
+      <Button Grid.Column="1" Content="刷新报表" MinWidth="100"
+              Command="{Binding RefreshCommand}" Margin="16,8"/>
+    </Grid>
+
+    <ScrollViewer Grid.Row="1" Margin="16">
+      <StackPanel Spacing="16">
+        <!-- 基本信息 -->
+       <!-- <Border Background="{StaticResource BrushBgPanel}"
+                BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+                CornerRadius="10" Padding="16">
+          <Grid RowDefinitions="Auto,Auto,Auto">
+            <TextBlock Grid.Row="0" Text="基本信息" FontSize="14" FontWeight="SemiBold"
+                       Foreground="{StaticResource BrushTextPrimary}" Margin="0,0,0,12"/>
+            
+            <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto,*,Auto,*">
+              <TextBlock Grid.Column="0" Text="车型型号" VerticalAlignment="Center"
+                         FontSize="12" Foreground="{StaticResource BrushTextTertiary}" Margin="0,8,12,8"/>
+              <TextBox Grid.Column="1" Text="{Binding SelectedProductModel}" Width="200" Margin="0,8"/>
+              
+              <TextBlock Grid.Column="2" Text="车型车号" VerticalAlignment="Center"
+                         FontSize="12" Foreground="{StaticResource BrushTextTertiary}" Margin="20,8,12,8"/>
+              <TextBox Grid.Column="3" Text="{Binding SelectedVehicleNumber}" Width="200" Margin="0,8"/>
+              
+              <TextBlock Grid.Column="4" Text="试验员" VerticalAlignment="Center"
+                         FontSize="12" Foreground="{StaticResource BrushTextTertiary}" Margin="20,8,12,8"/>
+              <TextBox Grid.Column="5" Text="{Binding SelectedTesterName}" Width="200" Margin="0,8"/>
+            </Grid>
+            
+            <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto,*,Auto,*">
+              <TextBlock Grid.Column="0" Text="试验时间" VerticalAlignment="Center"
+                         FontSize="12" Foreground="{StaticResource BrushTextTertiary}" Margin="0,8,12,8"/>
+              <TextBox Grid.Column="1" Text="{Binding SelectedTestTime}" Width="200" Margin="0,8" Watermark="yyyy-MM-dd HH:mm:ss"/>
+              
+              <TextBlock Grid.Column="2" Text="设备编号" VerticalAlignment="Center"
+                         FontSize="12" Foreground="{StaticResource BrushTextTertiary}" Margin="20,8,12,8"/>
+              <TextBox Grid.Column="3" Text="{Binding SelectedDeviceNumber}" Width="200" Margin="0,8"/>
+              
+              <TextBlock Grid.Column="4" Text="备注信息" VerticalAlignment="Center"
+                         FontSize="12" Foreground="{StaticResource BrushTextTertiary}" Margin="20,8,12,8"/>
+              <TextBox Grid.Column="5" Text="{Binding SelectedRemarks}" Width="200" Margin="0,8"/>
+            </Grid>
+          </Grid>
+        </Border>-->
+
+        <!-- 回路测试数据 -->
+       <!-- <Border Background="{StaticResource BrushBgPanel}"
+                BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+                CornerRadius="10" Padding="16">
+          <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+            <TextBlock Grid.Row="0" Text="回路测试数据" FontSize="14" FontWeight="SemiBold"
+                       Foreground="{StaticResource BrushTextPrimary}" Margin="0,0,0,12"/>
+            
+            <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto,*,Auto,*">
+              <TextBlock Grid.Column="0" Text="回路一试验电压(KV)" VerticalAlignment="Center"
+                         FontSize="12" Foreground="{StaticResource BrushTextTertiary}" Margin="0,8,12,8"/>
+              <TextBox Grid.Column="1" Text="{Binding SelectedLoopOneWithstandVoltage}" Width="150" Margin="0,8"/>
+              
+              <TextBlock Grid.Column="2" Text="回路一泄漏电流(mA)" VerticalAlignment="Center"
+                         FontSize="12" Foreground="{StaticResource BrushTextTertiary}" Margin="20,8,12,8"/>
+              <TextBox Grid.Column="3" Text="{Binding SelectedLoopOneLeakageCurrent}" Width="150" Margin="0,8"/>
+              
+              <TextBlock Grid.Column="4" Text="回路一测试结果" VerticalAlignment="Center"
+                         FontSize="12" Foreground="{StaticResource BrushTextTertiary}" Margin="20,8,12,8"/>
+              <ComboBox Grid.Column="5" SelectedItem="{Binding SelectedLoopOneTestResult}" Width="150" Margin="0,8">
+                <ComboBox.Items>
+                  <x:String>合格</x:String>
+                  <x:String>不合格</x:String>
+                </ComboBox.Items>
+              </ComboBox>
+            </Grid>
+            
+            <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto,*,Auto,*">
+              <TextBlock Grid.Column="0" Text="回路二试验电压(KV)" VerticalAlignment="Center"
+                         FontSize="12" Foreground="{StaticResource BrushTextTertiary}" Margin="0,8,12,8"/>
+              <TextBox Grid.Column="1" Text="{Binding SelectedLoopTwoWithstandVoltage}" Width="150" Margin="0,8"/>
+              
+              <TextBlock Grid.Column="2" Text="回路二泄漏电流(mA)" VerticalAlignment="Center"
+                         FontSize="12" Foreground="{StaticResource BrushTextTertiary}" Margin="20,8,12,8"/>
+              <TextBox Grid.Column="3" Text="{Binding SelectedLoopTwoLeakageCurrent}" Width="150" Margin="0,8"/>
+              
+              <TextBlock Grid.Column="4" Text="回路二测试结果" VerticalAlignment="Center"
+                         FontSize="12" Foreground="{StaticResource BrushTextTertiary}" Margin="20,8,12,8"/>
+              <ComboBox Grid.Column="5" SelectedItem="{Binding SelectedLoopTwoTestResult}" Width="150" Margin="0,8">
+                <ComboBox.Items>
+                  <x:String>合格</x:String>
+                  <x:String>不合格</x:String>
+                </ComboBox.Items>
+              </ComboBox>
+            </Grid>
+            
+            <Grid Grid.Row="3" ColumnDefinitions="Auto,*,Auto,*,Auto,*">
+              <TextBlock Grid.Column="0" Text="回路三试验电压(KV)" VerticalAlignment="Center"
+                         FontSize="12" Foreground="{StaticResource BrushTextTertiary}" Margin="0,8,12,8"/>
+              <TextBox Grid.Column="1" Text="{Binding SelectedLoopThreeWithstandVoltage}" Width="150" Margin="0,8"/>
+              
+              <TextBlock Grid.Column="2" Text="回路三泄漏电流(mA)" VerticalAlignment="Center"
+                         FontSize="12" Foreground="{StaticResource BrushTextTertiary}" Margin="20,8,12,8"/>
+              <TextBox Grid.Column="3" Text="{Binding SelectedLoopThreeLeakageCurrent}" Width="150" Margin="0,8"/>
+              
+              <TextBlock Grid.Column="4" Text="回路三测试结果" VerticalAlignment="Center"
+                         FontSize="12" Foreground="{StaticResource BrushTextTertiary}" Margin="20,8,12,8"/>
+              <ComboBox Grid.Column="5" SelectedItem="{Binding SelectedLoopThreeTestResult}" Width="150" Margin="0,8">
+                <ComboBox.Items>
+                  <x:String>合格</x:String>
+                  <x:String>不合格</x:String>
+                </ComboBox.Items>
+              </ComboBox>
+            </Grid>
+            
+            <Grid Grid.Row="4" ColumnDefinitions="Auto,*,Auto,*,Auto,*">
+              <TextBlock Grid.Column="0" Text="回路四试验电压(KV)" VerticalAlignment="Center"
+                         FontSize="12" Foreground="{StaticResource BrushTextTertiary}" Margin="0,8,12,8"/>
+              <TextBox Grid.Column="1" Text="{Binding SelectedLoopFourWithstandVoltage}" Width="150" Margin="0,8"/>
+              
+              <TextBlock Grid.Column="2" Text="回路四泄漏电流(mA)" VerticalAlignment="Center"
+                         FontSize="12" Foreground="{StaticResource BrushTextTertiary}" Margin="20,8,12,8"/>
+              <TextBox Grid.Column="3" Text="{Binding SelectedLoopFourLeakageCurrent}" Width="150" Margin="0,8"/>
+              
+              <TextBlock Grid.Column="4" Text="回路四测试结果" VerticalAlignment="Center"
+                         FontSize="12" Foreground="{StaticResource BrushTextTertiary}" Margin="20,8,12,8"/>
+              <ComboBox Grid.Column="5" SelectedItem="{Binding SelectedLoopFourTestResult}" Width="150" Margin="0,8">
+                <ComboBox.Items>
+                  <x:String>合格</x:String>
+                  <x:String>不合格</x:String>
+                </ComboBox.Items>
+              </ComboBox>
+            </Grid>
+            
+            <Grid Grid.Row="5" ColumnDefinitions="Auto,*,Auto,*,Auto,*">
+              <TextBlock Grid.Column="0" Text="绝缘电阻" VerticalAlignment="Center"
+                         FontSize="12" Foreground="{StaticResource BrushTextTertiary}" Margin="0,8,12,8"/>
+              <TextBox Grid.Column="1" Text="{Binding SelectedInsulationResistance}" Width="150" Margin="0,8"/>
+              
+              <TextBlock Grid.Column="2" Text="匝间耐压" VerticalAlignment="Center"
+                         FontSize="12" Foreground="{StaticResource BrushTextTertiary}" Margin="20,8,12,8"/>
+              <TextBox Grid.Column="3" Text="{Binding SelectedTurnWithstand}" Width="150" Margin="0,8"/>
+              
+              <TextBlock Grid.Column="4" Text="测试结果" VerticalAlignment="Center"
+                         FontSize="12" Foreground="{StaticResource BrushTextTertiary}" Margin="20,8,12,8"/>
+              <ComboBox Grid.Column="5" SelectedItem="{Binding SelectedTestResult}" Width="150" Margin="0,8">
+                <ComboBox.Items>
+                  <x:String>合格</x:String>
+                  <x:String>不合格</x:String>
+                </ComboBox.Items>
+              </ComboBox>
+            </Grid>
+          </Grid>
+        </Border>-->
+
+        <!-- 数据列表 -->
+        <Border Background="{StaticResource BrushBgPanel}"
+                BorderBrush="{StaticResource BrushBorder}" BorderThickness="1"
+                CornerRadius="10" Padding="16">
+          <Grid RowDefinitions="Auto,*">
+            <TextBlock Grid.Row="0" Text="历史记录列表" FontSize="14" FontWeight="SemiBold"
+                       Foreground="{StaticResource BrushTextPrimary}" Margin="0,0,0,12"/>
+            
+            <DataGrid Grid.Row="1" ItemsSource="{Binding RecordList}" 
+                      SelectedItem="{Binding SelectedRecord}"
+                      AutoGenerateColumns="False"
+                      RowHeight="30"
+                      SelectionMode="Single">
+              <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60"/>
+                <DataGridTextColumn Header="车型型号" Binding="{Binding ProductModel}" Width="120"/>
+                <DataGridTextColumn Header="车型车号" Binding="{Binding VehicleNumber}" Width="120"/>
+                <DataGridTextColumn Header="试验员" Binding="{Binding TesterName}" Width="100"/>
+                <DataGridTextColumn Header="试验时间" Binding="{Binding TestTime}" Width="150"/>
+                <DataGridTextColumn Header="测试结果" Binding="{Binding TestResult}" Width="100"/>
+                <DataGridTextColumn Header="创建时间" Binding="{Binding CreatedAt}" Width="150"/>
+              </DataGrid.Columns>
+            </DataGrid>
+          </Grid>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+
+    <Grid Grid.Row="2" ColumnDefinitions="*,*,*" Margin="16,16,16,16">
+      <Button Grid.Column="0" HorizontalAlignment="Center" MinWidth="120"
+              Content="打印报表" Command="{Binding PrintReportCommand}"/>
+      <Button Grid.Column="1" HorizontalAlignment="Center" MinWidth="120"
+              Content="删除" Command="{Binding DeleteCommand}"/>
+      <Button Grid.Column="3" HorizontalAlignment="Center" MinWidth="120"
+              Content="退出" Command="{Binding ExitCommand}"/>
+    </Grid>
+  </Grid>
+</UserControl>

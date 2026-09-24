@@ -1,0 +1,478 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:PressureTestApp.UI.ViewModels"
+        xmlns:layout="using:Avalonia.Layout"
+        xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
+        mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="560"
+        x:Class="PressureTestApp.UI.Views.TaskViewWindow"
+        x:DataType="vm:TaskViewViewModel"
+        Width="1180" Height="620" MinWidth="960" MinHeight="460"
+        WindowStartupLocation="CenterOwner"
+        SystemDecorations="None"
+        Background="Transparent"
+        Title="{Binding WindowTitle}">
+
+  <Window.Resources>
+    <!-- Fluent 默认勾选路径，供自定义样式在 :checked 时显式赋给 Path#CheckGlyph（避免 Semi/主题未写入 Data 导致无勾） -->
+    <StreamGeometry x:Key="TaskGridCheckmarkGeometry">M5.5 10.586 1.707 6.793A1 1 0 0 0 .293 8.207l4.5 4.5a1 1 0 0 0 1.414 0l11-11A1 1 0 0 0 15.793.293L5.5 10.586Z</StreamGeometry>
+  </Window.Resources>
+
+  <Window.Styles>
+    <!-- 参考图：炭灰壳 + 金标题 + 深色圆角筛选 + 橙色表头 + 浅灰/米色行 -->
+    <Style Selector="Border#TaskViewChrome">
+      <Setter Property="Background" Value="#FF2C2E33"/>
+      <Setter Property="BorderBrush" Value="#FF3D4149"/>
+      <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <Style Selector="Border#TaskViewChrome ComboBox.task-filter-cb">
+      <Setter Property="MinHeight" Value="30"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Background" Value="#FF1E2024"/>
+      <Setter Property="BorderBrush" Value="#FF6B7078"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="5"/>
+      <Setter Property="Foreground" Value="#FFF0F0F0"/>
+      <Setter Property="Padding" Value="8,0"/>
+    </Style>
+
+    <Style Selector="Border#TaskViewChrome Button.task-search-btn">
+      <Setter Property="MinHeight" Value="30"/>
+      <Setter Property="Background" Value="#FF1E2024"/>
+      <Setter Property="BorderBrush" Value="#FF8A9099"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="6"/>
+      <Setter Property="Foreground" Value="#FFF5F5F5"/>
+      <Setter Property="Padding" Value="18,8"/>
+    </Style>
+    <Style Selector="Border#TaskViewChrome Button.task-search-btn:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#FF2A2D33"/>
+    </Style>
+
+    <!-- 底部独立横向条：浅轨 + 黑色滑块（与 DataGrid 内条同步） -->
+    <Style Selector="Border#TaskViewChrome ScrollBar.task-bottom-hscroll">
+      <Setter Property="MinHeight" Value="16"/>
+      <Setter Property="Height" Value="16"/>
+      <Setter Property="Background" Value="#FFE8E4DB"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Opacity" Value="1"/>
+    </Style>
+    <Style Selector="Border#TaskViewChrome ScrollBar.task-bottom-hscroll:disabled">
+      <Setter Property="Opacity" Value="1"/>
+    </Style>
+    <!-- 横向条在主题里靠 Track 撑高度，Maximum=0 时仍保留一条可辨认的轨道 -->
+    <Style Selector="Border#TaskViewChrome ScrollBar.task-bottom-hscroll /template/ Track">
+      <Setter Property="MinHeight" Value="12"/>
+    </Style>
+    <Style Selector="Border#TaskViewChrome ScrollBar.task-bottom-hscroll /template/ Thumb#PART_Thumb">
+      <Setter Property="Background" Value="#FF0A0A0A"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="3"/>
+      <Setter Property="MinHeight" Value="8"/>
+    </Style>
+    <Style Selector="Border#TaskViewChrome ScrollBar.task-bottom-hscroll /template/ Thumb#PART_Thumb:pointerover">
+      <Setter Property="Background" Value="#FF000000"/>
+    </Style>
+
+    <Style Selector="Border#TaskViewChrome Button.task-footer-btn">
+      <Setter Property="MinHeight" Value="48"/>
+      <Setter Property="MinWidth" Value="200"/>
+      <Setter Property="Background" Value="#FF25272C"/>
+      <Setter Property="BorderBrush" Value="#FF7A8088"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="Foreground" Value="#FFF5F5F5"/>
+      <Setter Property="Padding" Value="20,0"/>
+    </Style>
+    <Style Selector="Border#TaskViewChrome Button.task-footer-btn:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#FF32353C"/>
+    </Style>
+
+    <Style Selector="Button.task-redo-btn">
+      <Setter Property="Background" Value="#FF333C47"/>
+      <Setter Property="BorderBrush" Value="#FF4A5562"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="6"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="Padding" Value="12,6"/>
+      <Setter Property="FontSize" Value="12"/>
+    </Style>
+    <Style Selector="Button.task-redo-btn:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#FF3D4754"/>
+    </Style>
+
+    <Style Selector="DataGrid#TaskResultGrid">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="GridLinesVisibility" Value="All"/>
+      <Setter Property="HeadersVisibility" Value="Column"/>
+      <!-- Hidden：不显示表内横条，由底部 task-bottom-hscroll 专门负责横向拖动 -->
+      <Setter Property="HorizontalScrollBarVisibility" Value="Hidden"/>
+      <Setter Property="HorizontalGridLinesBrush" Value="#18000000"/>
+      <Setter Property="VerticalGridLinesBrush" Value="#18000000"/>
+      <!-- 隐藏表内纵条，避免与右侧固定「操作」列之间出现一条空白缝；纵滚仍可用滚轮，并与右侧 ScrollViewer 同步 -->
+      <Setter Property="VerticalScrollBarVisibility" Value="Hidden"/>
+    </Style>
+    <Style Selector="DataGrid#TaskResultGrid DataGridCell">
+      <Setter Property="Padding" Value="10,8,10,8"/>
+    </Style>
+    <Style Selector="DataGrid#TaskResultGrid DataGridColumnHeader">
+      <Setter Property="Background" Value="#FFF29B52"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Padding" Value="10,12,10,14"/>
+      <Setter Property="MinHeight" Value="56"/>
+      <Setter Property="ClipToBounds" Value="False"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="DataGrid#TaskResultGrid DataGridColumnHeader ContentPresenter#PART_ContentPresenter">
+      <Setter Property="ClipToBounds" Value="False"/>
+      <Setter Property="MinHeight" Value="48"/>
+      <Setter Property="VerticalAlignment" Value="Stretch"/>
+    </Style>
+    <Style Selector="DataGrid#TaskResultGrid DataGridColumnHeader ContentPresenter#PART_ContentPresenter TextBlock">
+      <Setter Property="TextWrapping" Value="Wrap"/>
+      <Setter Property="TextAlignment" Value="Center"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="LineHeight" Value="20"/>
+    </Style>
+    <Style Selector="DataGrid#TaskResultGrid DataGridCell TextBlock">
+      <Setter Property="Foreground" Value="#FF2C2E33"/>
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="FontWeight" Value="Normal"/>
+    </Style>
+    <!-- 表格勾选：未选白底细边框；选中蓝底白勾 -->
+    <Style Selector="DataGrid#TaskResultGrid CheckBox.task-result-cb">
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="MinHeight" Value="22"/>
+      <Setter Property="MinWidth" Value="22"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="DataGrid#TaskResultGrid CheckBox.task-result-cb /template/ Border#PART_Border">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="DataGrid#TaskResultGrid CheckBox.task-result-cb:checked">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderBrush" Value="Transparent"/>
+    </Style>
+    <Style Selector="DataGrid#TaskResultGrid CheckBox.task-result-cb /template/ Border#NormalRectangle">
+      <Setter Property="Background" Value="#FFFFFFFF"/>
+      <Setter Property="BorderBrush" Value="#FFADA59C"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="2"/>
+      <Setter Property="Width" Value="16"/>
+      <Setter Property="Height" Value="16"/>
+    </Style>
+    <Style Selector="DataGrid#TaskResultGrid CheckBox.task-result-cb:pointerover /template/ Border#NormalRectangle">
+      <Setter Property="BorderBrush" Value="#FF7A7369"/>
+    </Style>
+    <Style Selector="DataGrid#TaskResultGrid CheckBox.task-result-cb:pressed /template/ Border#NormalRectangle">
+      <Setter Property="Background" Value="#FFF5F2ED"/>
+    </Style>
+    <Style Selector="DataGrid#TaskResultGrid CheckBox.task-result-cb:checked /template/ Border#PART_Border">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="DataGrid#TaskResultGrid CheckBox.task-result-cb:checked /template/ Border#NormalRectangle">
+      <Setter Property="Background" Value="#FF2563EB"/>
+      <Setter Property="BorderBrush" Value="#FF1D4ED8"/>
+    </Style>
+    <Style Selector="DataGrid#TaskResultGrid CheckBox.task-result-cb:checked:pointerover /template/ Border#NormalRectangle">
+      <Setter Property="Background" Value="#FF1D4ED8"/>
+      <Setter Property="BorderBrush" Value="#FF1E40AF"/>
+    </Style>
+    <Style Selector="DataGrid#TaskResultGrid CheckBox.task-result-cb:checked /template/ Path#CheckGlyph">
+      <Setter Property="Data" Value="{StaticResource TaskGridCheckmarkGeometry}"/>
+      <Setter Property="Width" Value="9"/>
+      <Setter Property="Opacity" Value="1"/>
+      <Setter Property="Fill" Value="#FFFFFFFF"/>
+    </Style>
+    <Style Selector="DataGrid#TaskResultGrid CheckBox.task-result-cb:checked:pointerover /template/ Path#CheckGlyph">
+      <Setter Property="Opacity" Value="1"/>
+      <Setter Property="Fill" Value="#FFF8FAFC"/>
+    </Style>
+    <Style Selector="DataGrid#TaskResultGrid CheckBox.task-result-cb:checked:pressed /template/ Border#NormalRectangle">
+      <Setter Property="Background" Value="#FF1E40AF"/>
+      <Setter Property="BorderBrush" Value="#FF172554"/>
+    </Style>
+    <!-- 图二：浅米/灰褐斑马纹 + 可读正文色 -->
+    <Style Selector="DataGrid#TaskResultGrid DataGridRow:nth-child(odd)">
+      <Setter Property="Background" Value="#FFF5F1EB"/>
+    </Style>
+    <Style Selector="DataGrid#TaskResultGrid DataGridRow:nth-child(even)">
+      <Setter Property="Background" Value="#FFE3DDD5"/>
+    </Style>
+    <Style Selector="DataGrid#TaskResultGrid DataGridRow:selected">
+      <Setter Property="Background" Value="#FFD0C8BE"/>
+    </Style>
+    <!-- 与右侧「任务重做」行统一最小高度，减少纵向错位 -->
+    <Style Selector="DataGrid#TaskResultGrid DataGridRow">
+      <Setter Property="MinHeight" Value="48"/>
+    </Style>
+    <!-- 右侧「任务重做」列：行底色与主表斑马纹一致（子项容器为 ContentPresenter） -->
+    <Style Selector="ItemsControl#TaskRedoRailItems StackPanel > ContentPresenter:nth-child(odd)">
+      <Setter Property="Background" Value="#FFF5F1EB"/>
+      <Setter Property="Padding" Value="0"/>
+    </Style>
+    <Style Selector="ItemsControl#TaskRedoRailItems StackPanel > ContentPresenter:nth-child(even)">
+      <Setter Property="Background" Value="#FFE3DDD5"/>
+      <Setter Property="Padding" Value="0"/>
+    </Style>
+  </Window.Styles>
+
+  <Border x:Name="TaskViewChrome"
+          CornerRadius="10"
+          BoxShadow="0 12 36 0 #60000000"
+          ClipToBounds="False">
+    <Grid RowDefinitions="46,Auto,*">
+
+      <!-- 标题栏（金橙标题） -->
+      <Border Grid.Row="0"
+              Background="#FF2C2E33"
+              BorderBrush="#FF3D4149"
+              BorderThickness="0,0,0,1"
+              PointerPressed="OnTitleBarPointerPressed">
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBlock Grid.Column="0" Text="{Binding WindowTitle}" FontSize="16" FontWeight="SemiBold"
+                     Foreground="#FFE8C06C"
+                     VerticalAlignment="Center" Margin="20,0"/>
+          <Button Grid.Column="1" Width="36" Height="36" Padding="0" Margin="0,0,10,0"
+                  Background="Transparent" BorderThickness="0"
+                  Foreground="#FFB0B4BC"
+                  Content="✕" Click="OnCloseClick"/>
+        </Grid>
+      </Border>
+
+      <!-- 筛选行 -->
+      <Border Grid.Row="1" Background="#FF2C2E33" Padding="18,10,18,10"
+              BorderBrush="#FF3D4149" BorderThickness="0,0,0,1">
+        <Grid ColumnDefinitions="Auto,*,Auto,*,Auto,*,Auto" RowDefinitions="Auto">
+          <TextBlock Grid.Column="0" Text="{Binding ModelFilterLabel}" VerticalAlignment="Center"
+                     Foreground="#FFE8EAED" FontSize="13" Margin="0,0,10,0"/>
+          <ComboBox Grid.Column="1" MinWidth="140"
+                    Classes="task-filter-cb"
+                    ItemsSource="{Binding ModelCodeItems}"
+                    SelectedItem="{Binding SelectedModelCode}"
+                    PlaceholderText="--请选择--"/>
+
+          <TextBlock Grid.Column="2" Text="{Binding AssignedFilterLabel}" VerticalAlignment="Center"
+                     Foreground="#FFE8EAED" FontSize="13" Margin="18,0,10,0"/>
+          <ComboBox Grid.Column="3" MinWidth="140"
+                    Classes="task-filter-cb"
+                    ItemsSource="{Binding AssignedVehicleItems}"
+                    SelectedItem="{Binding SelectedAssignedVehicle}"
+                    PlaceholderText="--请选择--"/>
+
+          <TextBlock Grid.Column="4" Text="{Binding TrainFilterLabel}" VerticalAlignment="Center"
+                     Foreground="#FFE8EAED" FontSize="13" Margin="18,0,10,0"/>
+          <ComboBox Grid.Column="5" MinWidth="140"
+                    Classes="task-filter-cb"
+                    ItemsSource="{Binding TrainColumnItems}"
+                    SelectedItem="{Binding SelectedTrainColumn}"
+                    PlaceholderText="--请选择--"/>
+
+          <Button Grid.Column="6" Classes="task-search-btn" Margin="18,0,0,0"
+                  Command="{Binding SearchCommand}" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock Text="🔍" VerticalAlignment="Center" FontSize="14"/>
+              <TextBlock Text="搜索" VerticalAlignment="Center" FontSize="13"/>
+            </StackPanel>
+          </Button>
+        </Grid>
+      </Border>
+
+      <!-- 表格区：DataGrid、横向平移按钮、底部大按钮 -->
+      <Border Grid.Row="2" Background="#FFF5F1EB" Margin="0" Padding="10,10,10,8" ClipToBounds="False">
+        <Grid RowDefinitions="*,Auto,Auto">
+          <Grid Grid.Row="0" RowDefinitions="*">
+          <!-- 有数据：主表横向滚动；右侧「操作」列固定，纵向与表内 ScrollViewer 同步 -->
+          <Grid Grid.Row="0" ColumnDefinitions="*,Auto" IsVisible="{Binding HasData}">
+          <dg:DataGrid x:Name="TaskResultGrid"
+                       Grid.Column="0"
+                       VerticalAlignment="Stretch"
+                       HorizontalAlignment="Stretch"
+                       ItemsSource="{Binding SearchResults}"
+                       SelectedItem="{Binding SelectedResultRow}"
+                       AutoGenerateColumns="False"
+                       IsReadOnly="False"
+                       FrozenColumnCount="{Binding TaskResultFrozenColumnCount}"
+                       CanUserSortColumns="{Binding !ShowFooterActions}"
+                       MinHeight="220">
+            <dg:DataGrid.Columns>
+              <DataGridTemplateColumn Width="48" CanUserResize="False">
+                <DataGridTemplateColumn.Header>
+                  <Border Width="48" HorizontalAlignment="{x:Static layout:HorizontalAlignment.Center}"
+                          VerticalAlignment="{x:Static layout:VerticalAlignment.Stretch}"
+                          Background="Transparent">
+                    <CheckBox Classes="task-result-cb"
+                              IsChecked="{Binding IsAllSelected, Mode=TwoWay}"
+                              HorizontalAlignment="{x:Static layout:HorizontalAlignment.Center}"
+                              VerticalAlignment="{x:Static layout:VerticalAlignment.Center}"/>
+                  </Border>
+                </DataGridTemplateColumn.Header>
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate DataType="vm:TaskSearchResultRow">
+                    <Border Width="48" HorizontalAlignment="{x:Static layout:HorizontalAlignment.Center}"
+                            VerticalAlignment="{x:Static layout:VerticalAlignment.Stretch}"
+                            Background="Transparent">
+                      <CheckBox Classes="task-result-cb"
+                                IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                HorizontalAlignment="{x:Static layout:HorizontalAlignment.Center}"
+                                VerticalAlignment="{x:Static layout:VerticalAlignment.Center}"/>
+                    </Border>
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <!-- 协议 4.1 返回结果说明字段（任务查看） -->
+              <DataGridTextColumn Header="车型" Binding="{Binding ModelCode}" Width="120" MinWidth="100" IsReadOnly="True"/>
+              <DataGridTextColumn Header="车号" Binding="{Binding TrainSetNumber}" Width="120" MinWidth="100" IsReadOnly="True"/>
+              <DataGridTextColumn Header="工件编号" Binding="{Binding AssignedVehicleNumber}" Width="160" MinWidth="120" IsReadOnly="True"/>
+              <DataGridTextColumn Header="工件类型" Binding="{Binding StepName}" Width="160" MinWidth="120" IsReadOnly="True"/>
+              <DataGridTextColumn Header="作业任务id" Binding="{Binding ConstructionTaskId}" Width="*" MinWidth="180" IsReadOnly="True"/>
+              <!-- 任务回传保留原明细列 -->
+              <DataGridTextColumn Header="车型编码" Binding="{Binding ModelCode}" Width="108" MinWidth="100" IsReadOnly="True"/>
+              <DataGridTextColumn Header="配属列号" Binding="{Binding AssignedTrainNumber}" Width="108" MinWidth="100" IsReadOnly="True"/>
+              <DataGridTextColumn Header="配属辆号" Binding="{Binding AssignedVehicleNumber}" Width="108" MinWidth="100" IsReadOnly="True"/>
+              <DataGridTextColumn Header="车列号" Binding="{Binding TrainSetNumber}" Width="88" MinWidth="80" IsReadOnly="True"/>
+              <DataGridTextColumn Header="明细ID" Binding="{Binding DetailId}" Width="108" MinWidth="96" IsReadOnly="True"/>
+              <DataGridTextColumn Header="施工任务ID" Binding="{Binding ConstructionTaskId}" Width="118" MinWidth="108" IsReadOnly="True"/>
+              <DataGridTextColumn Header="子任务ID" Binding="{Binding WithstandSubTaskId}" Width="128" MinWidth="118" IsReadOnly="True"/>
+              <DataGridTextColumn Header="步骤名称" Binding="{Binding StepName}" Width="128" MinWidth="112" IsReadOnly="True"/>
+              <DataGridTextColumn Header="操作区域" Binding="{Binding OperationArea}" Width="200" MinWidth="160" IsReadOnly="True"/>
+              <DataGridTextColumn Header="操作内容" Binding="{Binding OperationContent}" Width="240" MinWidth="200" IsReadOnly="True"/>
+              <DataGridTextColumn Header="环境温度(℃)" Binding="{Binding AmbientTempC}" Width="108" MinWidth="96" IsReadOnly="True"/>
+              <DataGridTextColumn Header="环境湿度(%)" Binding="{Binding AmbientHumidityPct}" Width="108" MinWidth="96" IsReadOnly="True"/>
+              <DataGridTextColumn Header="试验结果值" Binding="{Binding TestResultValue}" Width="116" MinWidth="108" IsReadOnly="True"/>
+              <DataGridTextColumn Header="备注" Binding="{Binding Remark}" Width="112" MinWidth="96" IsReadOnly="True"/>
+              <DataGridTextColumn Header="操作人姓名" Binding="{Binding OperatorName}" Width="108" MinWidth="96" IsReadOnly="True"/>
+              <DataGridTextColumn Header="操作人工号" Binding="{Binding OperatorJobId}" Width="128" MinWidth="118" IsReadOnly="True"/>
+              <DataGridTextColumn Header="操作时间" Binding="{Binding OperationTime}" Width="172" MinWidth="160" IsReadOnly="True"/>
+            </dg:DataGrid.Columns>
+          </dg:DataGrid>
+          <Border Grid.Column="1"
+                  Width="120"
+                  MinWidth="118"
+                  Background="Transparent"
+                  BorderBrush="#18000000"
+                  BorderThickness="1,0,0,0"
+                  IsVisible="{Binding ShowOperationRail}">
+            <Grid RowDefinitions="Auto,*">
+              <Border x:Name="TaskRedoOperationHeader"
+                      Grid.Row="0"
+                      Background="#FFF29B52"
+                      BorderBrush="#18000000"
+                      BorderThickness="0,0,0,1"
+                      MinHeight="56">
+                <TextBlock Text="操作"
+                           Foreground="White"
+                           FontWeight="SemiBold"
+                           FontSize="12"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+              </Border>
+              <ScrollViewer x:Name="TaskRedoRailScroll"
+                            Grid.Row="1"
+                            HorizontalScrollBarVisibility="Disabled"
+                            VerticalScrollBarVisibility="Hidden">
+                <ItemsControl x:Name="TaskRedoRailItems"
+                              ItemsSource="{Binding SearchResults}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <StackPanel Orientation="Vertical"/>
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:TaskSearchResultRow">
+                      <Border BorderBrush="#18000000"
+                              BorderThickness="0,0,0,1"
+                              Background="Transparent"
+                              Padding="10,0,10,0"
+                              VerticalAlignment="Stretch">
+                        <Button Classes="task-redo-btn"
+                                Content="{Binding #TaskResultGrid.((vm:TaskViewViewModel)DataContext).OperationButtonText}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Command="{Binding #TaskResultGrid.((vm:TaskViewViewModel)DataContext).TaskOperationCommand}"
+                                CommandParameter="{Binding}"/>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </ScrollViewer>
+            </Grid>
+          </Border>
+          </Grid>
+          <StackPanel Grid.Row="0"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"
+                      Spacing="8"
+                      IsVisible="{Binding !HasData}">
+            <TextBlock Text="暂无数据"
+                       FontSize="16"
+                       Foreground="#FF6B6560"
+                       HorizontalAlignment="Center"/>
+            <TextBlock Text="{Binding StatusMessage}"
+                       FontSize="13"
+                       Foreground="#FF8A8278"
+                       TextWrapping="Wrap"
+                       TextAlignment="Center"
+                       MaxWidth="560"
+                       HorizontalAlignment="Center"/>
+          </StackPanel>
+          </Grid>
+
+          <!-- 底部横向滚动条：固定高度容器，避免 Maximum=0 时 ScrollBar 量算高度为 0「看不见」 -->
+          <Border Grid.Row="1"
+                  MinHeight="22"
+                  Margin="8,4,8,6"
+                  Padding="2,2"
+                  Background="#FFD9D4CC"
+                  CornerRadius="6"
+                  BorderBrush="#FFC4BDB2"
+                  BorderThickness="1">
+            <ScrollBar x:Name="TaskGridBottomHScroll"
+                       Classes="task-bottom-hscroll"
+                       Orientation="Horizontal"
+                       VerticalAlignment="Center"
+                       Minimum="0"
+                       Maximum="0"
+                       Value="0"
+                       ViewportSize="0"
+                       AllowAutoHide="False"/>
+          </Border>
+
+          <!-- 底部操作按钮 -->
+          <Border Grid.Row="2"
+                  Background="#FFF5F1EB"
+                  BorderThickness="0"
+                  Padding="20,12,20,18"
+                  IsVisible="{Binding ShowFooterActions}">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="28">
+              <Button Classes="task-footer-btn"
+                      Command="{Binding OneClickDataReturnCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                  <TextBlock Text="⬆" FontSize="16" VerticalAlignment="Center"/>
+                  <TextBlock Text="一键数据回传" FontSize="14" VerticalAlignment="Center"/>
+                </StackPanel>
+              </Button>
+              <Button Classes="task-footer-btn"
+                      Command="{Binding ExitInterfaceCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                  <TextBlock Text="⎋" FontSize="16" VerticalAlignment="Center"/>
+                  <TextBlock Text="界面退出" FontSize="14" VerticalAlignment="Center"/>
+                </StackPanel>
+              </Button>
+            </StackPanel>
+          </Border>
+        </Grid>
+      </Border>
+    </Grid>
+  </Border>
+</Window>
